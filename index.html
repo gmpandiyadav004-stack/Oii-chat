@@ -4,87 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oii Chat 💬</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <!-- ========================================== -->
-        <!-- LOGIN SCREEN -->
-        <!-- ========================================== -->
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-screen">
 
-        <div id="loginScreen" class="login-screen">
-            <div class="login-box">
-                
-                <h1>Oii Chat 💬</h1>
-                <p>Welcome to Oii Chat</p>
+        <div class="login-box">
 
-                <!-- Phone Number Input -->
-                <input 
-                    type="tel" 
-                    id="phoneNumber" 
-                    placeholder="Phone Number (eg. +919876543210)"
-                >
+            <h1>Oii Chat 💬</h1>
 
-                <!-- Send OTP Button -->
-                <button onclick="sendOTP()">
-                    Send OTP
-                </button>
+            <p>Welcome to Oii Chat</p>
 
-                <!-- reCAPTCHA Container (Firebase தேவைப்படுவது) -->
-                <div id="recaptcha-container" style="margin: 15px 0;"></div>
+            <!-- PHONE NUMBER -->
+            <input
+                type="tel"
+                id="phoneNumber"
+                placeholder="Phone Number (+919876543210)"
+            >
 
-                <!-- OTP Input -->
-                <input 
-                    type="text" 
-                    id="otpInput" 
-                    placeholder="Enter 6-digit OTP"
-                >
+            <!-- SEND OTP -->
+            <button onclick="sendOTP()">
+                Send OTP
+            </button>
 
-                <!-- Verify OTP & Login Button -->
-                <button onclick="verifyOTP()">
-                    Verify & Login
-                </button>
+            <!-- FIREBASE reCAPTCHA -->
+            <div id="recaptcha-container"></div>
 
-                <!-- Auth Status / Error Messages -->
-                <p id="authMessage" style="margin-top: 15px; font-weight: bold;"></p>
+            <!-- OTP -->
+            <input
+                type="text"
+                id="otpInput"
+                placeholder="Enter 6-digit OTP"
+                maxlength="6"
+            >
 
-            </div>
-        </div>
+            <!-- VERIFY -->
+            <button onclick="verifyOTP()">
+                Verify & Login
+            </button>
 
-        <!-- ========================================== -->
-        <!-- MAIN OII CHAT APP (Hidden initially) -->
-        <!-- ========================================== -->
-
-        <div id="chatApp" style="display: none;">
-            
-            <!-- TOP HEADER -->
-            <header class="top-header">
-                <div class="profile-area">
-                    <img 
-                        src="profile.png" 
-                        class="my-profile" 
-                        alt="Profile"
-                    >
-                    <div>
-                        <h1>Oii Chat 💬</h1>
-                        <span>Online</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Chat Area Placeholder -->
-            <div class="chat-container" style="padding: 20px;">
-                <p>Chat screen coming soon...</p>
-            </div>
+            <!-- MESSAGE -->
+            <p id="authMessage"></p>
 
         </div>
 
     </div>
 
-    <!-- JavaScript Link (Module type) -->
-    <script type="module" src="script.js"></script>
 
-</body>
-</html>
+    <!-- MAIN CHAT APP -->
+    <div id="chatApp" style="display:none;">
+
+        <!-- HEADER -->
+        <header class="top-header">
+
+            <div class="profile-area">
+
+                <img
+                    src="profile.png"
+                    class="my-profile"
+                    alt="Profile"
+                >
+
+                <div>
+                    <h1>Oii Chat 💬</h1>
+                    <span>Online</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- CHAT AREA -->
+        <div class="chat-container">
+
+            <div class="welcome-chat">
+
+                <h2>Welcome to Oii Chat ❤️</h2>
+
+                <p>
+                    Your chat app is ready.
+                </p>
+
+            </div>
+
+        </div>
