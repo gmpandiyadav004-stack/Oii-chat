@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oii Chat 😉</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- =========================
+             LOGIN SCREEN
+        ========================== -->
+
+        <div id="loginScreen" class="login-screen">
+
+            <div class="login-box">
+
+                <h1>Oii Chat 😉</h1>
+
+                <p>Welcome to Oii Chat</p>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Email"
+                >
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Password"
+                >
+
+                <button onclick="registerUser()">
+                    Create Account
+                </button>
+
+                <button onclick="loginUser()">
+                    Login
+                </button>
+
+                <p id="authMessage"></p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             MAIN OII CHAT APP
+        ========================== -->
+
+        <div id="chatApp" style="display:none;">
+
+            <!-- TOP HEADER -->
+
+            <header class="top-header">
+
+                <div class="profile-area">
+
+                    <img
+                        src="profile.jpg"
+                        class="my-profile"
+                        alt="Profile"
+                    >
+
+                    <div>
+
+                        <h2>Oii Chat 😉</h2>
+
+                        <span>Online</span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="header-icons">
+
+                    <button>🔍</button>
+
+                    <button>⋮</button>
+
+                </div>
+
+            </header>
+
+
+            <!-- TABS -->
+
+            <nav class="tabs">
+
+                <button
+                    class="tab active"
+                    onclick="showTab('chats')"
+                >
+                    💬 Chats
+                </button>
+
+                <button
+                    class="tab"
+                    onclick="showTab('status')"
+                >
+                    🟢 Status
+                </button>
+
+                <button
+                    class="tab"
+                    onclick="showTab('calls')"
+                >
+                    📞 Calls
+                </button>
+
+            </nav>
+
+
+            <!-- MAIN CONTENT -->
+
+            <main class="content">
+
+
+                <!-- =========================
+                     CHATS
+                ========================== -->
+
+                <section
+                    id="chats"
+                    class="tab-content active"
+                >
+
+                    <div class="search-box">
+
+                        🔍
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search chats..."
+                            onkeyup="searchChats()"
+                        >
+
+                    </div>
+
+
+                    <div class="chat-list">
+
+
+                        <!-- CHAT 1 -->
+
+                        <div
+                            class="chat-item"
+                            onclick="openChat('Siva', 'online')"
+                        >
+
+                            <img
+                                src="user1.jpg"
+                                class="user-photo"
+                            >
+
+                            <div class="chat-info">
+
+                                <div class="chat-top">
+
+                                    <h3>Siva</h3>
+
+                                    <span class="time">
+                                        5:30 PM
+                                    </span>
+
+                                </div>
+
+
+                                <div class="chat-bottom">
+
+                                    <p>
+                                        Hi bro 😎
+                                    </p>
+
+                                    <span class="unread">
+                                        2
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CHAT 2 -->
+
+                        <div
+                            class="chat-item"
+                            onclick="openChat('Karthi', 'online')"
+                        >
+
+                            <img
+                                src="user2.jpg"
+                                class="user-photo"
+                            >
+
+                            <div class="chat-info">
+
+                                <div class="chat-top">
+
+                                    <h3>Karthi</h3>
+
+                                    <span class="time">
+                                        4:45 PM
+                                    </span>
+
+                                </div>
+
+
+                                <div class="chat-bottom">
+
+                                    <p>
+                                        Enna da panra? 😁
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CHAT 3 -->
+
+                        <div
+                            class="chat-item"
+                            onclick="openChat(
+                                'Friends Group',
+                                '5 members online'
+                            )"
+                        >
+
+                            <div class="group-photo">
+                                👥
+                            </div>
+
+                            <div class="chat-info">
+
+                                <div class="chat-top">
+
+                                    <h3>
+                                        Friends Group
+                                    </h3>
+
+                                    <span class="time">
+                                        3:20 PM
+                                    </span>
+
+                                </div>
+
+
+                                <div class="chat-bottom">
+
+                                    <p>
+                                        🔥 New message
+                                    </p>
+
+                                    <span class="unread">
+                                        5
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CHAT 4 -->
+
+                        <div
+                            class="chat-item"
+                            onclick="openChat(
+                                'Vijay',
+                                'last seen recently'
+                            )"
+                        >
+
+                            <img
+                                src="user3.jpg"
+                                class="user-photo"
+                            >
+
+                            <div class="chat-info">
+
+                                <div class="chat-top">
+
+                                    <h3>Vijay</h3>
+
+                                    <span class="time">
+                                        Yesterday
+                                    </span>
+
+                                </div>
+
+
+                                <div class="chat-bottom">
+
+                                    <p>
+                                        😂😂😂
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     STATUS
+                ========================== -->
+
+                <section
+                    id="status"
+                    class="tab-content"
+                >
+
+                    <div class="status-item">
+
+                        <div class="status-add">
+                            +
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                My Status
+                            </h3>
+
+                            <p>
+                                Tap to add status update
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <h4 class="section-title">
+                        Recent updates
+                    </h4>
+
+
+                    <div class="status-item">
+
+                        <img
+                            src="user1.jpg"
+                            class="user-photo"
+                        >
+
+                        <div>
+
+                            <h3>
+                                Siva
+                            </h3>
+
+                            <p>
+                                Today, 5:10 PM
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     CALLS
+                ========================== -->
+
+                <section
+                    id="calls"
+                    class="tab-content"
+                >
+
+                    <div class="call-item">
+
+                        <img
+                            src="user2.jpg"
+                            class="user-photo"
+                        >
+
+                        <div class="call-info">
+
+                            <h3>
+                                Karthi
+                            </h3>
+
+                            <p>
+                                ↙ Incoming • Today, 4:20 PM
+                            </p>
+
+                        </div>
+
+
+                        <button class="call-button">
+                            📞
+                        </button>
+
+                    </div>
+
+
+                    <div class="call-item">
+
+                        <img
+                            src="user3.jpg"
+                            class="user-photo"
+                        >
+
+                        <div class="call-info">
+
+                            <h3>
+                                Vijay
+                            </h3>
+
+                            <p>
+                                ↗ Outgoing • Yesterday
+                            </p>
+
+                        </div>
+
+
+                        <button class="call-button">
+                            📞
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+            </main>
+
+
+            <!-- =========================
+                 CHAT WINDOW
+            ========================== -->
+
+            <div
+                id="chatWindow"
+                class="chat-window"
+            >
+
+                <header class="chat-header">
+
+                    <button
+                        class="back-button"
+                        onclick="closeChat()"
+                    >
+                        ←
+                    </button>
+
+
+                    <img
+                        id="chatImage"
+                        src="user1.jpg"
+                        class="chat-profile"
+                    >
+
+
+                    <div class="chat-user-info">
+
+                        <h3 id="chatTitle">
+                            Siva
+                        </h3>
+
+                        <span id="chatStatus">
+                            online
+                        </span>
+
+                    </div>
+
+
+                    <div class="chat-actions">
+
+                        <button>
+                            📹
+                        </button>
+
+                        <button>
+                            📞
+                        </button>
+
+                        <button>
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </header>
+
+
+                <!-- MESSAGES -->
+
+                <div
+                    id="messages"
+                    class="messages"
+                >
+
+                    <div class="message received">
+
+                        <span>
+                            Hi da 😎
+                        </span>
+
+                        <small>
+                            5:29 PM
+                        </small>
+
+                    </div>
+
+
+                    <div class="message sent">
+
+                        <span>
+                            Hi bro ❤️
+                        </span>
+
+                        <small>
+                            5:30 PM ✓✓
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MESSAGE INPUT -->
+
+                <div class="message-input-area">
+
+                    <button class="emoji-button">
+                        😊
+                    </button>
+
+
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Type a message..."
+                        onkeypress="handleEnter(event)"
+                    >
+
+
+                    <button class="attach-button">
+                        📎
+                    </button>
+
+
+                    <button
+                        class="send-button"
+                        onclick="sendMessage()"
+                    >
+                        ➤
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         FIREBASE
+    ========================== -->
+
+    <script type="module">
+
+        import {
+            initializeApp
+        } from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+
+        import {
+            getAuth,
+            onAuthStateChanged
+        } from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyCzPOAjXI0dJ33RJCVIUyCCFGyeI50Dvd0",
+
+            authDomain:
+                "oii-chat-8802e.firebaseapp.com",
+
+            projectId:
+                "oii-chat-8802e",
+
+            storageBucket:
+                "oii-chat-8802e.firebasestorage.app",
+
+            messagingSenderId:
+                "1017345795063",
+
+            appId:
+                "1:1017345795063:web:c6f7930dac8b37760d84f2",
+
+            measurementId:
+                "G-TRX2FSBNRB"
+
+        };
+
+
+        const app =
+            initializeApp(firebaseConfig);
+
+
+        const auth =
+            getAuth(app);
+
+
+        window.oiiAuth = auth;
+
+
+        onAuthStateChanged(
+            auth,
+            (user) => {
+
+                const loginScreen =
+                    document.getElementById(
+                        "loginScreen"
+                    );
+
+                const chatApp =
+                    document.getElementById(
+                        "chatApp"
+                    );
+
+
+                if (user) {
+
+                    loginScreen.style.display =
+                        "none";
+
+                    chatApp.style.display =
+                        "block";
+
+                    console.log(
+                        "Logged in:",
+                        user.email ||
+                        user.phoneNumber
+                    );
+
+                } else {
+
+                    loginScreen.style.display =
+                        "flex";
+
+                    chatApp.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+    <!-- MAIN JAVASCRIPT -->
+
+    <script type="module" src="script.js"></script>
+
+</body>
+</html>
