@@ -1,11 +1,11 @@
 // ==========================================
 // OII CHAT - FULL JAVASCRIPT
+// Mobile Number + OTP + Chat
 // ==========================================
 
-// Firebase Auth imports
 import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
@@ -32,33 +32,70 @@ function showAuthMessage(message) {
 
 
 // ==========================================
-// CREATE ACCOUNT
+// PHONE OTP
 // ==========================================
 
-window.registerUser = async function () {
+let recaptchaVerifier = null;
+let confirmationResult = null;
 
-    const email = document
-        .getElementById("email")
-        .value
-        .trim();
 
-    const password = document
-        .getElementById("password")
-        .value;
+// ==========================================
+// RECAPTCHA
+// ==========================================
 
-    if (!email || !password) {
+function setupRecaptcha() {
+
+    if (recaptchaVerifier) {
+        return;
+    }
+
+    recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+            size: "normal"
+        }
+    );
+
+    recaptchaVerifier.render();
+}
+
+
+// ==========================================
+// SEND OTP
+// ==========================================
+
+window.sendOTP = async function () {
+
+    const phoneInput =
+        document.getElementById("phoneNumber");
+
+    if (!phoneInput) {
+        return;
+    }
+
+    let phone =
+        phoneInput.value.trim();
+
+    if (!phone) {
 
         showAuthMessage(
-            "Email and password enter pannunga da."
+            "Mobile number enter pannunga da 📱"
         );
 
         return;
     }
 
-    if (password.length < 6) {
+    // India 10 digit number
+    if (/^[0-9]{10}$/.test(phone)) {
+        phone = "+91" + phone;
+    }
+
+    // International number check
+    if (!/^\+[1-9][0-9]{7,14}$/.test(phone)) {
 
         showAuthMessage(
-            "Password minimum 6 characters irukkanum."
+            "Correct mobile number enter pannunga da."
         );
 
         return;
@@ -66,36 +103,60 @@ window.registerUser = async function () {
 
     try {
 
-        await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+        setupRecaptcha();
 
         showAuthMessage(
-            "Account created successfully! "
+            "OTP sending... 📱"
+        );
+
+        confirmationResult =
+            await signInWithPhoneNumber(
+                auth,
+                phone,
+                recaptchaVerifier
+            );
+
+        showAuthMessage(
+            "OTP send aayiduchu da ❤️"
         );
 
     } catch (error) {
 
         console.log(error);
 
-        if (error.code === "auth/email-already-in-use") {
+        if (recaptchaVerifier) {
+
+            try {
+                recaptchaVerifier.clear();
+            } catch (e) {
+                console.log(e);
+            }
+
+            recaptchaVerifier = null;
+        }
+
+        if (
+            error.code ===
+            "auth/invalid-phone-number"
+        ) {
 
             showAuthMessage(
-                " email already registered da."
+                "Mobile number correct-aa enter pannunga da."
             );
 
-        } else if (error.code === "auth/invalid-email") {
+        } else if (
+            error.code ===
+            "auth/too-many-requests"
+        ) {
 
             showAuthMessage(
-                "Email  enter  da."
+                "Too many attempts. Konjam neram wait pannunga da."
             );
 
         } else {
 
             showAuthMessage(
-                "Account create .  try ."
+                "OTP send aagala da. Please try again."
             );
         }
     }
@@ -103,24 +164,34 @@ window.registerUser = async function () {
 
 
 // ==========================================
-// LOGIN
+// VERIFY OTP
 // ==========================================
 
-window.loginUser = async function () {
+window.verifyOTP = async function () {
 
-    const email = document
-        .getElementById("email")
-        .value
-        .trim();
+    const otpInput =
+        document.getElementById("otp");
 
-    const password = document
-        .getElementById("password")
-        .value;
+    if (!otpInput) {
+        return;
+    }
 
-    if (!email || !password) {
+    const otp =
+        otpInput.value.trim();
+
+    if (!confirmationResult) {
 
         showAuthMessage(
-            "Email and password enter pannunga da."
+            "First Send OTP press pannunga da 📱"
+        );
+
+        return;
+    }
+
+    if (!/^[0-9]{6}$/.test(otp)) {
+
+        showAuthMessage(
+            "6 digit OTP enter pannunga da."
         );
 
         return;
@@ -128,14 +199,14 @@ window.loginUser = async function () {
 
     try {
 
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
+        showAuthMessage(
+            "OTP verify pannudhu... ⏳"
         );
 
+        await confirmationResult.confirm(otp);
+
         showAuthMessage(
-            "Login successful! "
+            "Login successful! ❤️"
         );
 
     } catch (error) {
@@ -143,26 +214,27 @@ window.loginUser = async function () {
         console.log(error);
 
         if (
-            error.code === "auth/invalid-credential" ||
-            error.code === "auth/wrong-password"
+            error.code ===
+            "auth/invalid-verification-code"
         ) {
 
             showAuthMessage(
-                "Email  password  da."
+                "OTP wrong da. Correct OTP enter pannunga."
             );
 
         } else if (
-            error.code === "auth/user-not-found"
+            error.code ===
+            "auth/code-expired"
         ) {
 
             showAuthMessage(
-                " email- account ."
+                "OTP expired da. New OTP send pannunga."
             );
 
         } else {
 
             showAuthMessage(
-                "Login .  try ."
+                "OTP verification failed da."
             );
         }
     }
@@ -179,7 +251,9 @@ window.logoutUser = async function () {
 
         await signOut(auth);
 
-        console.log("User logged out");
+        console.log(
+            "User logged out"
+        );
 
     } catch (error) {
 
@@ -204,7 +278,9 @@ window.openChat = function (name, status) {
     const chatStatus =
         document.getElementById("chatStatus");
 
-    if (!chatWindow) return;
+    if (!chatWindow) {
+        return;
+    }
 
     if (chatTitle) {
         chatTitle.innerText = name;
@@ -214,8 +290,6 @@ window.openChat = function (name, status) {
         chatStatus.innerText = status;
     }
 
-    // IMPORTANT
-    // Open chat window
     chatWindow.style.display = "flex";
 
     setTimeout(() => {
@@ -242,8 +316,8 @@ window.closeChat = function () {
 
     if (chatWindow) {
 
-        chatWindow.style.display = "none";
-
+        chatWindow.style.display =
+            "none";
     }
 };
 
@@ -260,7 +334,9 @@ window.sendMessage = function () {
     const messages =
         document.getElementById("messages");
 
-    if (!input || !messages) return;
+    if (!input || !messages) {
+        return;
+    }
 
     const message =
         input.value.trim();
@@ -269,60 +345,45 @@ window.sendMessage = function () {
         return;
     }
 
-    // Message container
     const messageBox =
         document.createElement("div");
 
     messageBox.className =
         "message sent";
 
-
-    // Message text
     const text =
         document.createElement("span");
 
     text.innerText =
         message;
 
-
-    // Time
     const time =
         document.createElement("small");
 
     time.innerText =
-        getTime() + " ";
-
+        getTime() + " ✓";
 
     messageBox.appendChild(text);
-
     messageBox.appendChild(time);
 
     messages.appendChild(messageBox);
 
-
-    // Clear input
     input.value = "";
 
-
-    // Scroll bottom
     messages.scrollTop =
         messages.scrollHeight;
 
-
-    // Delivered
     setTimeout(() => {
 
         time.innerText =
-            getTime() + " ";
+            getTime() + " ✓✓";
 
     }, 1000);
 
-
-    // Read
     setTimeout(() => {
 
         time.innerText =
-            getTime() + " ";
+            getTime() + " 💞";
 
     }, 2500);
 };
@@ -339,7 +400,6 @@ window.handleEnter = function (event) {
         event.preventDefault();
 
         window.sendMessage();
-
     }
 };
 
@@ -350,8 +410,7 @@ window.handleEnter = function (event) {
 
 function getTime() {
 
-    const now =
-        new Date();
+    const now = new Date();
 
     return now.toLocaleTimeString(
         [],
@@ -380,7 +439,6 @@ window.showTab = function (tabName) {
 
     });
 
-
     const tabs =
         document.querySelectorAll(".tab");
 
@@ -390,32 +448,28 @@ window.showTab = function (tabName) {
 
     });
 
-
     const selected =
         document.getElementById(tabName);
 
     if (selected) {
 
         selected.classList.add("active");
-
     }
 
-
-    // Find clicked tab
     const clickedTab =
         Array.from(tabs).find(tab => {
 
             return tab.innerText
                 .toLowerCase()
-                .includes(tabName.toLowerCase());
+                .includes(
+                    tabName.toLowerCase()
+                );
 
         });
-
 
     if (clickedTab) {
 
         clickedTab.classList.add("active");
-
     }
 };
 
@@ -427,37 +481,37 @@ window.showTab = function (tabName) {
 window.searchChats = function () {
 
     const input =
-        document.getElementById("searchInput");
+        document.getElementById(
+            "searchInput"
+        );
 
-    if (!input) return;
+    if (!input) {
+        return;
+    }
 
     const search =
         input.value
             .toLowerCase()
             .trim();
 
-
     const chats =
         document.querySelectorAll(
             ".chat-item"
         );
 
-
     chats.forEach(chat => {
 
         const text =
-            chat.innerText.toLowerCase();
+            chat.innerText
+                .toLowerCase();
 
         if (text.includes(search)) {
 
-            chat.style.display =
-                "flex";
+            chat.style.display = "flex";
 
         } else {
 
-            chat.style.display =
-                "none";
-
+            chat.style.display = "none";
         }
 
     });
@@ -473,7 +527,7 @@ document.addEventListener(
     () => {
 
         console.log(
-            "Oii Chat JavaScript loaded successfully "
+            "Oii Chat JavaScript loaded successfully ❤️"
         );
 
     }
