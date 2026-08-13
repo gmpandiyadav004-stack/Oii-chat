@@ -1,18 +1,15 @@
-// ==========================================
-// OII CHAT - FIREBASE PHONE OTP
-// ==========================================
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getAuth,
     RecaptchaVerifier,
     signInWithPhoneNumber
-} from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-// ==========================================
+
+// ===============================
 // FIREBASE CONFIG
-// ==========================================
+// ===============================
 
 const firebaseConfig = {
     apiKey: "AIzaSyCzPOAjXI0dJ33RJCVIUyCCFGyeI50Dvd0",
@@ -24,35 +21,32 @@ const firebaseConfig = {
     measurementId: "G-TRX2FSBNRB"
 };
 
-// ==========================================
+
+// ===============================
 // INITIALIZE FIREBASE
-// ==========================================
+// ===============================
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// ==========================================
-// VARIABLES
-// ==========================================
 
-let recaptchaVerifier = null;
-let confirmationResult = null;
-
-// ==========================================
+// ===============================
 // MESSAGE
-// ==========================================
+// ===============================
 
-function showAuthMessage(message) {
-    const box = document.getElementById("authMessage");
+const message = document.getElementById("authMessage");
 
-    if (box) {
-        box.innerText = message;
-    }
+function showMessage(text) {
+    message.innerText = text;
 }
 
-// ==========================================
-// SETUP reCAPTCHA
-// ==========================================
+
+// ===============================
+// reCAPTCHA
+// ===============================
+
+let recaptchaVerifier;
+let confirmationResult;
 
 function setupRecaptcha() {
 
@@ -67,106 +61,102 @@ function setupRecaptcha() {
             size: "normal"
         }
     );
-
-    recaptchaVerifier.render();
 }
 
-// ==========================================
+
+// ===============================
 // SEND OTP
-// ==========================================
+// ===============================
 
 window.sendOTP = async function () {
 
-    const phoneInput = document.getElementById("phoneNumber");
+    const phoneNumber =
+        document.getElementById("phoneNumber").value.trim();
 
-    if (!phoneInput) {
-        showAuthMessage("Phone number box கிடைக்கவில்லை");
+    if (!phoneNumber) {
+        showMessage("Phone number enter pannunga 📱");
         return;
     }
 
-    let phone = phoneInput.value.trim();
-
-    if (!phone) {
-        showAuthMessage("தயவுசெய்து மொபைல் எண்ணை உள்ளிடவும்");
-        return;
-    }
-
-    if (!phone.startsWith("+")) {
-        showAuthMessage("Number-ஐ +91XXXXXXXXXX format-ல் உள்ளிடவும்");
+    if (!phoneNumber.startsWith("+")) {
+        showMessage(
+            "Country code use pannunga. Example: +919876543210"
+        );
         return;
     }
 
     try {
 
-        showAuthMessage("reCAPTCHA loading...");
+        showMessage("OTP sending... 📩");
 
         setupRecaptcha();
 
-        showAuthMessage("OTP அனுப்பப்படுகிறது...");
+        confirmationResult =
+            await signInWithPhoneNumber(
+                auth,
+                phoneNumber,
+                recaptchaVerifier
+            );
 
-        confirmationResult = await signInWithPhoneNumber(
-            auth,
-            phone,
-            recaptchaVerifier
+        showMessage(
+            "OTP sent successfully ❤️ 6-digit OTP enter pannunga."
         );
-
-        showAuthMessage("OTP அனுப்பப்பட்டது! 📱");
 
     } catch (error) {
 
-        console.error("OTP Error:", error);
+        console.error(error);
 
-        showAuthMessage(
-            "OTP Error: " + error.message
+        showMessage(
+            "OTP send aagala ❌ " + error.message
         );
+
+        if (recaptchaVerifier) {
+            recaptchaVerifier.clear();
+            recaptchaVerifier = null;
+        }
     }
 };
 
-// ==========================================
+
+// ===============================
 // VERIFY OTP
-// ==========================================
+// ===============================
 
 window.verifyOTP = async function () {
 
-    const otpInput = document.getElementById("otpInput");
-
-    if (!otpInput) {
-        return;
-    }
-
-    const otp = otpInput.value.trim();
-
-    if (!otp) {
-        showAuthMessage("தயவுசெய்து OTP-ஐ உள்ளிடவும்");
-        return;
-    }
+    const otp =
+        document.getElementById("otpInput").value.trim();
 
     if (!confirmationResult) {
-        showAuthMessage("முதலில் Send OTP அழுத்தவும்");
+        showMessage("First Send OTP click pannunga 📩");
+        return;
+    }
+
+    if (otp.length !== 6) {
+        showMessage("6-digit OTP enter pannunga 🔢");
         return;
     }
 
     try {
 
-        showAuthMessage("OTP சரிபார்க்கப்படுகிறது...");
+        showMessage("Verifying OTP... ⏳");
 
-        const result = await confirmationResult.confirm(otp);
+        await confirmationResult.confirm(otp);
 
-        const user = result.user;
+        showMessage("Login successful ❤️");
 
-        console.log("Logged in:", user);
-
-        showAuthMessage("Login வெற்றி! ❤️");
-
+        // Hide login
         document.getElementById("loginScreen").style.display = "none";
+
+        // Show chat
         document.getElementById("chatApp").style.display = "block";
 
     } catch (error) {
 
-        console.error("Verify Error:", error);
+        console.error(error);
 
-        showAuthMessage(
-            "OTP தவறாக உள்ளது. மீண்டும் முயற்சிக்கவும்."
+        showMessage(
+            "Wrong OTP ❌ Please try again."
         );
     }
 };
