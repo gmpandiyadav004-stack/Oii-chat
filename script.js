@@ -1,48 +1,65 @@
 // ==========================================
-// OII CHAT - FULL JAVASCRIPT
-// Mobile Number + OTP + Chat
+// OII CHAT - FIREBASE PHONE OTP
 // ==========================================
 
-import { 
-    RecaptchaVerifier, 
-    signInWithPhoneNumber, 
-    signOut 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+
+import {
+    getAuth,
+    RecaptchaVerifier,
+    signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 
-// ------------------------------------------
-// FIREBASE AUTH
-// ------------------------------------------
+// ==========================================
+// FIREBASE CONFIG
+// ==========================================
 
-const auth = window.FirebaseAuth;
+const firebaseConfig = {
+    apiKey: "AIzaSyCzPOAjXI0dJ33RJCVIUyCCFGyeI50Dvd0",
+    authDomain: "oii-chat-8802e.firebaseapp.com",
+    projectId: "oii-chat-8802e",
+    storageBucket: "oii-chat-8802e.firebasestorage.app",
+    messagingSenderId: "1017345795063",
+    appId: "1:1017345795063:web:c6f7930dac8b37760d84f2",
+    measurementId: "G-TRX2FSBNRB"
+};
 
-// ------------------------------------------
-// AUTH MESSAGE
-// ------------------------------------------
+// ==========================================
+// INITIALIZE FIREBASE
+// ==========================================
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// ==========================================
+// VARIABLES
+// ==========================================
+
+let recaptchaVerifier = null;
+let confirmationResult = null;
+
+// ==========================================
+// MESSAGE
+// ==========================================
 
 function showAuthMessage(message) {
     const box = document.getElementById("authMessage");
-    
+
     if (box) {
         box.innerText = message;
     }
 }
 
-// ------------------------------------------
-// PHONE & OTP
-// ------------------------------------------
-
-let recaptchaVerifier = null;
-let confirmationResult = null;
-
-// ------------------------------------------
-// RECAPTCHA
-// ------------------------------------------
+// ==========================================
+// SETUP reCAPTCHA
+// ==========================================
 
 function setupRecaptcha() {
+
     if (recaptchaVerifier) {
         return;
     }
-    
+
     recaptchaVerifier = new RecaptchaVerifier(
         auth,
         "recaptcha-container",
@@ -50,72 +67,106 @@ function setupRecaptcha() {
             size: "normal"
         }
     );
-    
+
     recaptchaVerifier.render();
 }
 
-// ------------------------------------------
+// ==========================================
 // SEND OTP
-// ------------------------------------------
+// ==========================================
 
 window.sendOTP = async function () {
+
     const phoneInput = document.getElementById("phoneNumber");
-    
+
     if (!phoneInput) {
+        showAuthMessage("Phone number box கிடைக்கவில்லை");
         return;
     }
-    
+
     let phone = phoneInput.value.trim();
-    
+
     if (!phone) {
         showAuthMessage("தயவுசெய்து மொபைல் எண்ணை உள்ளிடவும்");
         return;
     }
-    
+
+    if (!phone.startsWith("+")) {
+        showAuthMessage("Number-ஐ +91XXXXXXXXXX format-ல் உள்ளிடவும்");
+        return;
+    }
+
     try {
-        if (!recaptchaVerifier) {
-            setupRecaptcha();
-        }
-        
+
+        showAuthMessage("reCAPTCHA loading...");
+
+        setupRecaptcha();
+
         showAuthMessage("OTP அனுப்பப்படுகிறது...");
-        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        showAuthMessage("OTP வெற்றிகரமாக அனுப்பப்பட்டது!");
-        
+
+        confirmationResult = await signInWithPhoneNumber(
+            auth,
+            phone,
+            recaptchaVerifier
+        );
+
+        showAuthMessage("OTP அனுப்பப்பட்டது! 📱");
+
     } catch (error) {
-        console.error("Error sending OTP:", error);
-        showAuthMessage("பிழை: " + error.message);
+
+        console.error("OTP Error:", error);
+
+        showAuthMessage(
+            "OTP Error: " + error.message
+        );
     }
 };
 
-// ------------------------------------------
+// ==========================================
 // VERIFY OTP
-// ------------------------------------------
+// ==========================================
 
 window.verifyOTP = async function () {
-    const otpElement = document.getElementById("otpInput");
-    
-    if (!otpElement) {
+
+    const otpInput = document.getElementById("otpInput");
+
+    if (!otpInput) {
         return;
     }
-    
-    const otp = otpElement.value.trim();
-    
+
+    const otp = otpInput.value.trim();
+
     if (!otp) {
         showAuthMessage("தயவுசெய்து OTP-ஐ உள்ளிடவும்");
         return;
     }
-    
+
+    if (!confirmationResult) {
+        showAuthMessage("முதலில் Send OTP அழுத்தவும்");
+        return;
+    }
+
     try {
+
         showAuthMessage("OTP சரிபார்க்கப்படுகிறது...");
-        
+
         const result = await confirmationResult.confirm(otp);
+
         const user = result.user;
-        
-        showAuthMessage("Login வெற்றி! வணக்கம்.");
-        console.log("Logged in user:", user);
-        
+
+        console.log("Logged in:", user);
+
+        showAuthMessage("Login வெற்றி! ❤️");
+
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("chatApp").style.display = "block";
+
     } catch (error) {
-        console.error("Error during verifyOTP:", error);
-        showAuthMessage("தவறான OTP. மீண்டும் முயற்சிக்கவும்.");
+
+        console.error("Verify Error:", error);
+
+        showAuthMessage(
+            "OTP தவறாக உள்ளது. மீண்டும் முயற்சிக்கவும்."
+        );
     }
 };
