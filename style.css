@@ -1,5 +1,5 @@
 /* ==========================================
-   OII CHAT - MAIN STYLE
+   OII CHAT - WHATSAPP STYLE
 ========================================== */
 
 * {
@@ -8,43 +8,51 @@
     padding: 0;
 }
 
+html,
 body {
+    width: 100%;
+    height: 100%;
     font-family: Arial, sans-serif;
-    background: #f2f4f7;
-    min-height: 100vh;
+    background: #f0f2f5;
+}
+
+body {
+    overflow: hidden;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
 }
 
 .app {
     width: 100%;
-    min-height: 100vh;
+    height: 100vh;
 }
 
 
 /* ==========================================
-   LOGIN SCREEN
+   LOGIN
 ========================================== */
 
 .login-screen {
-    min-height: 100vh;
+    width: 100%;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    background: linear-gradient(
-        135deg,
-        #667eea,
-        #764ba2
-    );
+    background: #f0f2f5;
 }
 
 .login-box {
-    width: 100%;
+    width: 90%;
     max-width: 380px;
-    background: white;
     padding: 35px 25px;
-    border-radius: 22px;
+    background: white;
+    border-radius: 18px;
     text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.20);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .login-box h1 {
@@ -53,77 +61,120 @@ body {
 }
 
 .login-box p {
-    color: #666;
-    margin-bottom: 20px;
+    color: #667781;
+    margin-bottom: 22px;
 }
-
-
-/* ==========================================
-   GOOGLE LOGIN BUTTON
-========================================== */
 
 #googleLoginBtn {
     width: 100%;
-    border: none;
     padding: 14px;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #ffffff;
-    color: #222;
+    border: 1px solid #ddd;
     font-size: 16px;
     font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-    transition: 0.2s;
-}
-
-#googleLoginBtn:hover {
-    transform: translateY(-1px);
-}
-
-#googleLoginBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-#authMessage {
-    margin-top: 15px;
-    font-size: 14px;
 }
 
 
 /* ==========================================
-   TOP HEADER
+   MAIN APP
+========================================== */
+
+.chat-app {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+
+/* ==========================================
+   HEADER
 ========================================== */
 
 .top-header {
-    width: 100%;
-    background: #ffffff;
-    padding: 14px 18px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    height: 70px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #075e54;
+    color: white;
 }
 
-.profile-area {
+.header-left {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
 .my-profile {
-    width: 50px;
-    height: 50px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     object-fit: cover;
-    background: #ddd;
+    background: white;
 }
 
-.profile-area h1 {
+.header-left h1 {
     font-size: 21px;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 
-.profile-area span {
-    color: #20a464;
+#myStatus {
     font-size: 13px;
+    opacity: 0.85;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.header-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: transparent;
+    color: white;
+    font-size: 23px;
+}
+
+
+/* ==========================================
+   TABS
+========================================== */
+
+.chat-tabs {
+    height: 52px;
+    display: flex;
+    background: #075e54;
+    color: white;
+}
+
+.tab {
+    flex: 1;
+    height: 52px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+}
+
+.tab.active {
+    color: white;
+}
+
+.tab.active::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: 0;
+    height: 3px;
+    background: white;
 }
 
 
@@ -133,65 +184,20 @@ body {
 
 .chat-container {
     width: 100%;
-    max-width: 700px;
-    margin: auto;
-    padding: 18px;
+    height: calc(100vh - 122px);
+    overflow-y: auto;
+    background: white;
 }
-
-
-/* ==========================================
-   FRIENDS SECTION
-========================================== */
 
 .friends-section {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 18px;
-    margin-bottom: 18px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
-
-.friends-section h2 {
-    font-size: 20px;
-    margin-bottom: 15px;
-}
-
-
-/* ==========================================
-   CONTACT BUTTON
-========================================== */
-
-#findContactsBtn {
     width: 100%;
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    background: #667eea;
-    color: white;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
 }
 
-#findContactsBtn:hover {
-    opacity: 0.9;
-}
-
-#findContactsBtn:active {
-    transform: scale(0.98);
-}
-
-
-/* ==========================================
-   CONTACT MESSAGE
-========================================== */
-
-#contactsMessage {
-    margin-top: 12px;
-    color: #666;
-    font-size: 14px;
+.contacts-message {
+    padding: 8px 15px;
     text-align: center;
+    font-size: 13px;
+    color: #667781;
 }
 
 
@@ -199,38 +205,99 @@ body {
    FRIEND LIST
 ========================================== */
 
-#friendsList {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.friends-list {
+    width: 100%;
 }
 
-
-/* ==========================================
-   FRIEND CARD
-========================================== */
-
 .friend-card {
+    width: 100%;
+    min-height: 72px;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #f7f8fa;
-    border-radius: 14px;
-    border: 1px solid #eeeeee;
-    transition: 0.2s;
+    gap: 13px;
+    background: white;
+    border-bottom: 1px solid #eeeeee;
     cursor: pointer;
 }
 
 .friend-card:hover {
-    background: #eef1ff;
-    transform: translateY(-1px);
+    background: #f5f6f6;
 }
 
 .friend-card img {
-    width: 48px;
-    height: 48px;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px;
     border-radius: 50%;
     object-fit: cover;
-   
+}
+
+.friend-card h3 {
+    font-size: 17px;
+    color: #111b21;
+    margin-bottom: 4px;
+}
+
+.friend-card p {
+    font-size: 13px;
+    color: #667781;
+}
+
+
+/* ==========================================
+   EMPTY CHAT
+========================================== */
+
+.empty-chats {
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #667781;
+    padding: 30px;
+}
+
+.empty-icon {
+    font-size: 55px;
+    margin-bottom: 15px;
+}
+
+.empty-chats h2 {
+    color: #41525d;
+    margin-bottom: 8px;
+}
+
+.empty-chats p {
+    font-size: 14px;
+}
+
+
+/* ==========================================
+   NEW CHAT + BUTTON
+========================================== */
+
+.new-chat-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 25px;
+    width: 58px;
+    height: 58px;
+    border-radius: 17px;
+    background: #00a884;
+    color: white;
+    font-size: 34px;
+    line-height: 58px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+.new-chat-btn:active {
+    transform: scale(0.94);
+}
+
+
+/* =================================
