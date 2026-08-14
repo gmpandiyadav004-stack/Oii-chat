@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Oii Chat 💬</title>
 
     <link rel="stylesheet" href="style.css">
@@ -12,7 +13,9 @@
 
 <div class="app">
 
-    <!-- LOGIN SCREEN -->
+    <!-- =========================
+         LOGIN SCREEN
+    ========================== -->
     <div id="loginScreen" class="login-screen">
 
         <div class="login-box">
@@ -21,35 +24,12 @@
 
             <p>Welcome to Oii Chat</p>
 
-            <!-- PHONE NUMBER -->
-            <input
-                type="tel"
-                id="phoneNumber"
-                placeholder="Phone Number (+919876543210)"
-            >
-
-            <!-- SEND OTP -->
-            <button onclick="sendOTP()">
-                Send OTP
+            <!-- GOOGLE LOGIN -->
+            <button id="googleLoginBtn" type="button">
+                🔵 Continue with Google
             </button>
 
-            <!-- FIREBASE reCAPTCHA -->
-            <div id="recaptcha-container"></div>
-
-            <!-- OTP -->
-            <input
-                type="text"
-                id="otpInput"
-                placeholder="Enter 6-digit OTP"
-                maxlength="6"
-            >
-
-            <!-- VERIFY -->
-            <button onclick="verifyOTP()">
-                Verify & Login
-            </button>
-
-            <!-- MESSAGE -->
+            <!-- LOGIN MESSAGE -->
             <p id="authMessage"></p>
 
         </div>
@@ -57,8 +37,10 @@
     </div>
 
 
-    <!-- MAIN CHAT APP -->
-    <div id="chatApp" style="display:none;">
+    <!-- =========================
+         MAIN CHAT APP
+    ========================== -->
+    <div id="chatApp" style="display: none;">
 
         <!-- HEADER -->
         <header class="top-header">
@@ -95,10 +77,15 @@
             </div>
 
         </div>
-</div>
 
     </div>
 
+</div>
+
+
+<!-- =========================
+     JAVASCRIPT
+========================== -->
 <script type="module" src="script.js"></script>
 
 </body>
