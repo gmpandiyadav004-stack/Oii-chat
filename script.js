@@ -1,8 +1,11 @@
 // ==========================================
-// OII CHAT - FIREBASE GOOGLE LOGIN + USERS
+// OII CHAT
+// FIREBASE GOOGLE LOGIN + USERS + CONTACTS
 // ==========================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getAuth,
@@ -16,7 +19,10 @@ import {
     getFirestore,
     doc,
     setDoc,
-    serverTimestamp
+    collection,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
@@ -25,12 +31,19 @@ import {
 // ==========================================
 
 const firebaseConfig = {
+
     apiKey: "AIzaSyCzPOAjXI0dJ33RJCVIUyCCFGyeI50Dvd0",
+
     authDomain: "oii-chat-8802e.firebaseapp.com",
+
     projectId: "oii-chat-8802e",
+
     storageBucket: "oii-chat-8802e.firebasestorage.app",
+
     messagingSenderId: "1017345795063",
+
     appId: "1:1017345795063:web:c6f7930dac8b37760d84f2",
+
     measurementId: "G-TRX2FSBNRB"
 };
 
@@ -45,11 +58,12 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
 
-const googleProvider = new GoogleAuthProvider();
+const googleProvider =
+    new GoogleAuthProvider();
 
 
 // ==========================================
-// GET HTML ELEMENTS
+// HTML ELEMENTS
 // ==========================================
 
 const loginScreen =
@@ -64,6 +78,18 @@ const googleLoginBtn =
 const authMessage =
     document.getElementById("authMessage");
 
+const findContactsBtn =
+    document.getElementById("findContactsBtn");
+
+const contactsMessage =
+    document.getElementById("contactsMessage");
+
+const friendsList =
+    document.getElementById("friendsList");
+
+const myProfile =
+    document.getElementById("myProfile");
+
 
 // ==========================================
 // MESSAGE
@@ -72,14 +98,31 @@ const authMessage =
 function showMessage(text) {
 
     if (authMessage) {
+
         authMessage.textContent = text;
+
     }
 
 }
 
 
 // ==========================================
-// SAVE USER TO FIRESTORE
+// CONTACT MESSAGE
+// ==========================================
+
+function showContactsMessage(text) {
+
+    if (contactsMessage) {
+
+        contactsMessage.textContent = text;
+
+    }
+
+}
+
+
+// ==========================================
+// SAVE USER
 // ==========================================
 
 async function saveUser(user) {
@@ -89,29 +132,43 @@ async function saveUser(user) {
         const userRef =
             doc(db, "users", user.uid);
 
+
         await setDoc(
+
             userRef,
+
             {
+
                 uid: user.uid,
 
-                name: user.displayName || "",
+                name:
+                    user.displayName || "",
 
-                email: user.email || "",
+                email:
+                    user.email || "",
 
-                photoURL: user.photoURL || "",
+                photoURL:
+                    user.photoURL || "",
 
-                lastLogin: serverTimestamp(),
+                lastLogin:
+                    new Date(),
 
-                createdAt: serverTimestamp()
+                createdAt:
+                    new Date()
+
             },
+
             {
                 merge: true
             }
+
         );
+
 
         console.log(
             "User saved successfully ✅"
         );
+
 
     } catch (error) {
 
@@ -121,6 +178,26 @@ async function saveUser(user) {
         );
 
         throw error;
+
+    }
+
+}
+
+
+// ==========================================
+// UPDATE MY PROFILE
+// ==========================================
+
+function updateMyProfile(user) {
+
+    if (!user) return;
+
+
+    if (myProfile && user.photoURL) {
+
+        myProfile.src =
+            user.photoURL;
+
     }
 
 }
@@ -133,24 +210,35 @@ async function saveUser(user) {
 if (googleLoginBtn) {
 
     googleLoginBtn.addEventListener(
+
         "click",
+
         async function () {
 
             try {
 
-                googleLoginBtn.disabled = true;
+                googleLoginBtn.disabled =
+                    true;
+
 
                 showMessage(
                     "Google login opening... 🔵"
                 );
 
+
                 const result =
                     await signInWithPopup(
+
                         auth,
+
                         googleProvider
+
                     );
 
-                const user = result.user;
+
+                const user =
+                    result.user;
+
 
                 console.log(
                     "Google login successful:",
@@ -158,8 +246,10 @@ if (googleLoginBtn) {
                 );
 
 
-                // SAVE USER
                 await saveUser(user);
+
+
+                updateMyProfile(user);
 
 
                 showMessage(
@@ -167,17 +257,19 @@ if (googleLoginBtn) {
                 );
 
 
-                // HIDE LOGIN
                 if (loginScreen) {
+
                     loginScreen.style.display =
                         "none";
+
                 }
 
 
-                // SHOW CHAT
                 if (chatApp) {
+
                     chatApp.style.display =
                         "block";
+
                 }
 
 
@@ -188,10 +280,12 @@ if (googleLoginBtn) {
                     error
                 );
 
+
                 showMessage(
                     "Login failed ❌ " +
                     error.message
                 );
+
 
             } finally {
 
@@ -201,12 +295,420 @@ if (googleLoginBtn) {
             }
 
         }
+
     );
 
-} else {
+}
 
-    console.error(
-        "Google Login button not found ❌"
+
+// ==========================================
+// NORMALIZE PHONE NUMBER
+// ==========================================
+
+function normalizePhone(phone) {
+
+    if (!phone) return "";
+
+
+    let number =
+        phone.replace(
+            /[^0-9+]/g,
+            ""
+        );
+
+
+    // India number handling
+    if (
+        number.startsWith("0") &&
+        number.length === 10
+    ) {
+
+        number =
+            "+91" +
+            number.substring(1);
+
+    }
+
+
+    if (
+        number.length === 10 &&
+        !number.startsWith("+")
+    ) {
+
+        number =
+            "+91" +
+            number;
+
+    }
+
+
+    return number;
+
+}
+
+
+// ==========================================
+// FIND USER BY PHONE
+// ==========================================
+
+async function findUserByPhone(phone) {
+
+    try {
+
+        const normalized =
+            normalizePhone(phone);
+
+
+        if (!normalized) {
+
+            return null;
+
+        }
+
+
+        const usersRef =
+            collection(db, "users");
+
+
+        const q =
+            query(
+                usersRef,
+                where(
+                    "phone",
+                    "==",
+                    normalized
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(q);
+
+
+        if (
+            snapshot.empty
+        ) {
+
+            return null;
+
+        }
+
+
+        let foundUser = null;
+
+
+        snapshot.forEach(
+
+            function (document) {
+
+                foundUser =
+                    document.data();
+
+            }
+
+        );
+
+
+        return foundUser;
+
+
+    } catch (error) {
+
+        console.error(
+            "Find user error:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// ==========================================
+// SHOW FRIEND
+// ==========================================
+
+function addFriendToScreen(user) {
+
+    if (!friendsList) return;
+
+
+    const friend =
+        document.createElement(
+            "div"
+        );
+
+
+    friend.className =
+        "friend-card";
+
+
+    const image =
+        document.createElement(
+            "img"
+        );
+
+
+    image.src =
+        user.photoURL ||
+        "profile.png";
+
+
+    image.alt =
+        user.name || "Friend";
+
+
+    const info =
+        document.createElement(
+            "div"
+        );
+
+
+    const name =
+        document.createElement(
+            "h3"
+        );
+
+
+    name.textContent =
+        user.name ||
+        "Oii Chat User";
+
+
+    const email =
+        document.createElement(
+            "p"
+        );
+
+
+    email.textContent =
+        user.email || "";
+
+
+    info.appendChild(name);
+
+    info.appendChild(email);
+
+
+    friend.appendChild(image);
+
+    friend.appendChild(info);
+
+
+    friendsList.appendChild(friend);
+
+}
+
+
+// ==========================================
+// CLEAR FRIENDS
+// ==========================================
+
+function clearFriends() {
+
+    if (friendsList) {
+
+        friendsList.innerHTML = "";
+
+    }
+
+}
+
+
+// ==========================================
+// FIND FRIENDS FROM CONTACTS
+// ==========================================
+
+async function findFriendsFromContacts() {
+
+    if (!auth.currentUser) {
+
+        showContactsMessage(
+            "Please login first ❌"
+        );
+
+        return;
+
+    }
+
+
+    // Browser support check
+
+    if (
+        !("contacts" in navigator) ||
+        !("ContactsManager" in window)
+    ) {
+
+        showContactsMessage(
+
+            "இந்த browser-ல் Contacts access support இல்லை. Android app version-ல் இதை properly செய்யலாம். 📱"
+
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        showContactsMessage(
+            "Contacts permission கேட்கிறது... 📱"
+        );
+
+
+        const properties = [
+            "name",
+            "tel"
+        ];
+
+
+        const options = {
+            multiple: true
+        };
+
+
+        const contacts =
+            await navigator.contacts.select(
+
+                properties,
+
+                options
+
+            );
+
+
+        if (
+            !contacts ||
+            contacts.length === 0
+        ) {
+
+            showContactsMessage(
+                "Contacts select செய்யவில்லை."
+            );
+
+            return;
+
+        }
+
+
+        clearFriends();
+
+
+        showContactsMessage(
+            "Friends தேடுகிறது... 🔍"
+        );
+
+
+        let foundCount = 0;
+
+
+        for (
+            const contact of contacts
+        ) {
+
+
+            if (!contact.tel) {
+
+                continue;
+
+            }
+
+
+            for (
+                const phone of contact.tel
+            ) {
+
+
+                const user =
+                    await findUserByPhone(
+                        phone
+                    );
+
+
+                if (user) {
+
+
+                    // Don't show yourself
+
+                    if (
+                        auth.currentUser.uid
+                        === user.uid
+                    ) {
+
+                        continue;
+
+                    }
+
+
+                    addFriendToScreen(
+                        user
+                    );
+
+
+                    foundCount++;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+
+        if (foundCount === 0) {
+
+            showContactsMessage(
+
+                "உன் contacts-ல Oii Chat use பண்ற friends இன்னும் கிடைக்கவில்லை. 😕"
+
+            );
+
+        } else {
+
+            showContactsMessage(
+
+                `${foundCount} Oii Chat friend(s) found ❤️`
+
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Contacts error:",
+            error
+        );
+
+
+        showContactsMessage(
+
+            "Contacts access cancelled அல்லது error ஏற்பட்டது ❌"
+
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// CONTACT BUTTON
+// ==========================================
+
+if (findContactsBtn) {
+
+    findContactsBtn.addEventListener(
+
+        "click",
+
+        findFriendsFromContacts
+
     );
 
 }
@@ -217,10 +719,14 @@ if (googleLoginBtn) {
 // ==========================================
 
 onAuthStateChanged(
+
     auth,
+
     async function (user) {
 
+
         if (user) {
+
 
             console.log(
                 "User already logged in:",
@@ -228,7 +734,6 @@ onAuthStateChanged(
             );
 
 
-            // Save/update user
             try {
 
                 await saveUser(user);
@@ -243,66 +748,88 @@ onAuthStateChanged(
             }
 
 
-            // Hide login
+            updateMyProfile(user);
+
+
             if (loginScreen) {
+
                 loginScreen.style.display =
                     "none";
+
             }
 
 
-            // Show app
             if (chatApp) {
+
                 chatApp.style.display =
                     "block";
+
             }
 
+
         } else {
+
 
             console.log(
                 "No user logged in"
             );
 
 
-            // Show login
             if (loginScreen) {
+
                 loginScreen.style.display =
                     "flex";
+
             }
 
 
-            // Hide app
             if (chatApp) {
+
                 chatApp.style.display =
                     "none";
+
             }
 
         }
 
     }
+
 );
 
 
 // ==========================================
-// OPTIONAL LOGOUT FUNCTION
+// LOGOUT
 // ==========================================
 
-window.logoutOiiChat = async function () {
+window.logoutOiiChat =
+    async function () {
 
-    try {
+        try {
 
-        await signOut(auth);
+            await signOut(auth);
 
-        showMessage(
-            "Logged out successfully 👋"
-        );
 
-    } catch (error) {
+            showMessage(
+                "Logged out successfully 👋"
+            );
 
-        console.error(
-            "Logout error:",
-            error
-        );
 
-    }
+        } catch (error) {
 
-};
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        }
+
+    };
+
+
+// ==========================================
+// DEBUG
+// ==========================================
+
+console.log(
+    "Oii Chat loaded successfully ✅"
+);
