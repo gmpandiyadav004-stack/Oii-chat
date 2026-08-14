@@ -1,30 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Oii Chat 💬</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="login-screen">
+
+    <!-- ======================================
+         LOGIN SCREEN
+    ======================================= -->
+
+    <div
+        id="loginScreen"
+        class="login-screen"
+    >
 
         <div class="login-box">
 
             <h1>Oii Chat 💬</h1>
 
-            <p>Welcome to Oii Chat</p>
+            <p>
+                Welcome to Oii Chat
+            </p>
 
-            <button id="googleLoginBtn" type="button">
+
+            <button
+                id="googleLoginBtn"
+                type="button"
+            >
                 🔵 Continue with Google
             </button>
+
 
             <p id="authMessage"></p>
 
@@ -33,13 +59,26 @@
     </div>
 
 
-    <!-- CHAT APP -->
-    <div id="chatApp" style="display:none;">
 
-        <!-- HEADER -->
+    <!-- ======================================
+         OII CHAT APP
+    ======================================= -->
+
+    <div
+        id="chatApp"
+        class="chat-app"
+        style="display:none;"
+    >
+
+
+        <!-- ==================================
+             TOP HEADER
+        =================================== -->
+
         <header class="top-header">
 
-            <div class="profile-area">
+
+            <div class="header-left">
 
                 <img
                     id="myProfile"
@@ -48,55 +87,267 @@
                     alt="Profile"
                 >
 
+
                 <div>
-                    <h1>Oii Chat 💬</h1>
-                    <span id="myStatus">Online</span>
+
+                    <h1>
+                        Oii Chat
+                    </h1>
+
+                    <span id="myStatus">
+                        Online
+                    </span>
+
                 </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button
+                    type="button"
+                    class="header-btn"
+                    title="Search"
+                >
+                    🔍
+                </button>
+
+
+                <button
+                    type="button"
+                    class="header-btn"
+                    title="More"
+                >
+                    ⋮
+                </button>
 
             </div>
 
         </header>
 
 
-        <!-- MAIN -->
-        <div class="chat-container">
 
-            <!-- FRIENDS -->
-            <div class="friends-section">
+        <!-- ==================================
+             TABS
+        =================================== -->
 
-                <h2>👥 My Friends</h2>
+        <nav class="chat-tabs">
+
+            <button
+                class="tab active"
+                type="button"
+            >
+                Chats
+            </button>
+
+
+            <button
+                class="tab"
+                type="button"
+            >
+                Updates
+            </button>
+
+
+            <button
+                class="tab"
+                type="button"
+            >
+                Calls
+            </button>
+
+        </nav>
+
+
+
+        <!-- ==================================
+             CHAT LIST
+        =================================== -->
+
+        <main class="chat-container">
+
+
+            <section
+                class="friends-section"
+            >
+
+
+                <!-- Hidden message area
+                     used by JavaScript -->
+
+                <p
+                    id="contactsMessage"
+                    class="contacts-message"
+                ></p>
+
+
+                <!-- Friends appear here -->
+
+                <div
+                    id="friendsList"
+                    class="friends-list"
+                ></div>
+
+
+                <!-- Empty chat screen -->
+
+                <div
+                    id="emptyChats"
+                    class="empty-chats"
+                >
+
+                    <div class="empty-icon">
+                        💬
+                    </div>
+
+                    <h2>
+                        No chats yet
+                    </h2>
+
+                    <p>
+                        Start a new conversation
+                    </p>
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+
+        <!-- ==================================
+             FLOATING NEW CHAT BUTTON
+        =================================== -->
+
+        <button
+            id="findContactsBtn"
+            class="new-chat-btn"
+            type="button"
+            title="New Chat"
+        >
+            +
+        </button>
+
+
+
+        <!-- ==================================
+             CONTACTS PANEL
+        =================================== -->
+
+        <div
+            id="contactsPanel"
+            class="contacts-panel"
+            style="display:none;"
+        >
+
+
+            <div class="contacts-header">
+
 
                 <button
-                    id="findContactsBtn"
+                    id="closeContactsBtn"
                     type="button"
+                    class="back-btn"
                 >
-                    📱 Find Friends from Contacts
+                    ←
                 </button>
 
-                <p id="contactsMessage"></p>
 
-                <div id="friendsList"></div>
+                <div>
+
+                    <h2>
+                        New Chat
+                    </h2>
+
+                    <span>
+                        Contacts
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <!-- WELCOME -->
-            <div class="welcome-chat">
 
-                <h2>Welcome to Oii Chat ❤️</h2>
+            <div class="contacts-body">
 
-                <p>Your chat app is ready.</p>
+
+                <div class="contacts-title">
+
+                    <span>
+                        👥
+                    </span>
+
+                    <strong>
+                        Oii Chat Contacts
+                    </strong>
+
+                </div>
+
+
+                <p class="contacts-info">
+
+                    Your phone contacts who use
+                    Oii Chat will appear here.
+
+                </p>
+
+
+                <!-- Matching users -->
+
+                <div
+                    id="contactFriendsList"
+                    class="friends-list"
+                ></div>
+
 
             </div>
 
         </div>
 
+
+
+        <!-- ==================================
+             WELCOME CHAT
+        =================================== -->
+
+        <div
+            id="welcomeChat"
+            class="welcome-chat"
+        >
+
+            <div class="welcome-icon">
+                ❤️
+            </div>
+
+            <h2>
+                Welcome to Oii Chat
+            </h2>
+
+            <p>
+                Your private chat app is ready.
+            </p>
+
+        </div>
+
+
     </div>
+
 
 </div>
 
 
-<script type="module" src="./script.js"></script>
+
+<script
+    type="module"
+    src="./script.js"
+></script>
+
 
 </body>
+
 </html>
