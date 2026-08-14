@@ -1,16 +1,28 @@
+// ==========================================
+// OII CHAT - FIREBASE GOOGLE LOGIN + USERS
+// ==========================================
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// ===============================
+
+// ==========================================
 // FIREBASE CONFIG
-// ===============================
+// ==========================================
 
 const firebaseConfig = {
     apiKey: "AIzaSyCzPOAjXI0dJ33RJCVIUyCCFGyeI50Dvd0",
@@ -23,20 +35,22 @@ const firebaseConfig = {
 };
 
 
-// ===============================
+// ==========================================
 // INITIALIZE FIREBASE
-// ===============================
+// ==========================================
 
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 
+const db = getFirestore(app);
+
 const googleProvider = new GoogleAuthProvider();
 
 
-// ===============================
+// ==========================================
 // GET HTML ELEMENTS
-// ===============================
+// ==========================================
 
 const loginScreen =
     document.getElementById("loginScreen");
@@ -51,9 +65,9 @@ const authMessage =
     document.getElementById("authMessage");
 
 
-// ===============================
+// ==========================================
 // MESSAGE
-// ===============================
+// ==========================================
 
 function showMessage(text) {
 
@@ -64,9 +78,57 @@ function showMessage(text) {
 }
 
 
-// ===============================
+// ==========================================
+// SAVE USER TO FIRESTORE
+// ==========================================
+
+async function saveUser(user) {
+
+    try {
+
+        const userRef =
+            doc(db, "users", user.uid);
+
+        await setDoc(
+            userRef,
+            {
+                uid: user.uid,
+
+                name: user.displayName || "",
+
+                email: user.email || "",
+
+                photoURL: user.photoURL || "",
+
+                lastLogin: serverTimestamp(),
+
+                createdAt: serverTimestamp()
+            },
+            {
+                merge: true
+            }
+        );
+
+        console.log(
+            "User saved successfully ✅"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "User save error:",
+            error
+        );
+
+        throw error;
+    }
+
+}
+
+
+// ==========================================
 // GOOGLE LOGIN
-// ===============================
+// ==========================================
 
 if (googleLoginBtn) {
 
@@ -82,10 +144,6 @@ if (googleLoginBtn) {
                     "Google login opening... 🔵"
                 );
 
-                console.log(
-                    "Oii Chat: Google login started"
-                );
-
                 const result =
                     await signInWithPopup(
                         auth,
@@ -95,37 +153,47 @@ if (googleLoginBtn) {
                 const user = result.user;
 
                 console.log(
-                    "Oii Chat: Login successful",
+                    "Google login successful:",
                     user.email
                 );
 
+
+                // SAVE USER
+                await saveUser(user);
+
+
                 showMessage(
-                    "Login successful ❤️"
+                    "Welcome to Oii Chat ❤️"
                 );
 
-                loginScreen.style.display =
-                    "none";
 
-                chatApp.style.display =
-                    "block";
+                // HIDE LOGIN
+                if (loginScreen) {
+                    loginScreen.style.display =
+                        "none";
+                }
 
-            }
 
-            catch (error) {
+                // SHOW CHAT
+                if (chatApp) {
+                    chatApp.style.display =
+                        "block";
+                }
+
+
+            } catch (error) {
 
                 console.error(
-                    "Oii Chat Google Login Error:",
+                    "Google Login Error:",
                     error
                 );
 
                 showMessage(
-                    "Google Login Error ❌ " +
+                    "Login failed ❌ " +
                     error.message
                 );
 
-            }
-
-            finally {
+            } finally {
 
                 googleLoginBtn.disabled =
                     false;
@@ -138,46 +206,103 @@ if (googleLoginBtn) {
 } else {
 
     console.error(
-        "Oii Chat: googleLoginBtn not found ❌"
+        "Google Login button not found ❌"
     );
 
 }
 
 
-// ===============================
-// LOGIN STATE
-// ===============================
+// ==========================================
+// CHECK LOGIN STATE
+// ==========================================
 
 onAuthStateChanged(
     auth,
-    function (user) {
+    async function (user) {
 
         if (user) {
 
             console.log(
-                "Oii Chat: User already logged in",
+                "User already logged in:",
                 user.email
             );
 
-            loginScreen.style.display =
-                "none";
 
-            chatApp.style.display =
-                "block";
+            // Save/update user
+            try {
+
+                await saveUser(user);
+
+            } catch (error) {
+
+                console.error(
+                    "Auto save error:",
+                    error
+                );
+
+            }
+
+
+            // Hide login
+            if (loginScreen) {
+                loginScreen.style.display =
+                    "none";
+            }
+
+
+            // Show app
+            if (chatApp) {
+                chatApp.style.display =
+                    "block";
+            }
 
         } else {
 
             console.log(
-                "Oii Chat: No user logged in"
+                "No user logged in"
             );
 
-            loginScreen.style.display =
-                "flex";
 
-            chatApp.style.display =
-                "none";
+            // Show login
+            if (loginScreen) {
+                loginScreen.style.display =
+                    "flex";
+            }
+
+
+            // Hide app
+            if (chatApp) {
+                chatApp.style.display =
+                    "none";
+            }
 
         }
 
     }
 );
+
+
+// ==========================================
+// OPTIONAL LOGOUT FUNCTION
+// ==========================================
+
+window.logoutOiiChat = async function () {
+
+    try {
+
+        await signOut(auth);
+
+        showMessage(
+            "Logged out successfully 👋"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+};
