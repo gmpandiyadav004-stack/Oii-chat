@@ -1,6 +1,7 @@
 // ==========================================
 // OII CHAT
-// GOOGLE LOGIN + CONTACTS + PROFILE
+// GOOGLE LOGIN + PROFILE + CONTACTS
+// MOBILE REDIRECT LOGIN
 // ==========================================
 
 import {
@@ -10,7 +11,8 @@ import {
 import {
     getAuth,
     GoogleAuthProvider,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -50,21 +52,24 @@ const firebaseConfig = {
 
 
 // ==========================================
-// FIREBASE
+// INITIALIZE
 // ==========================================
 
-const app = initializeApp(firebaseConfig);
+const app =
+    initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const auth =
+    getAuth(app);
 
-const db = getFirestore(app);
+const db =
+    getFirestore(app);
 
 const googleProvider =
     new GoogleAuthProvider();
 
 
 // ==========================================
-// HTML ELEMENTS
+// HTML
 // ==========================================
 
 const loginScreen =
@@ -84,6 +89,9 @@ const myProfile =
 
 const myStatus =
     document.getElementById("myStatus");
+
+
+// PROFILE
 
 const profileOpenBtn =
     document.getElementById("profileOpenBtn");
@@ -118,6 +126,9 @@ const profileMessage =
 const logoutBtn =
     document.getElementById("logoutBtn");
 
+
+// CONTACTS
+
 const findContactsBtn =
     document.getElementById("findContactsBtn");
 
@@ -131,17 +142,13 @@ const contactsMessage =
     document.getElementById("contactsMessage");
 
 const contactFriendsList =
-    document.getElementById("contactFriendsList");
-
-const friendsList =
-    document.getElementById("friendsList");
-
-const emptyChats =
-    document.getElementById("emptyChats");
+    document.getElementById(
+        "contactFriendsList"
+    );
 
 
 // ==========================================
-// DEFAULT PROFILE
+// DEFAULT PHOTO
 // ==========================================
 
 const DEFAULT_PROFILE =
@@ -149,7 +156,14 @@ const DEFAULT_PROFILE =
 
 
 // ==========================================
-// MESSAGE
+// PROFILE PHOTO TEMP
+// ==========================================
+
+let pendingProfilePhoto = null;
+
+
+// ==========================================
+// MESSAGES
 // ==========================================
 
 function showMessage(text) {
@@ -216,8 +230,10 @@ function normalizePhone(phone) {
         number.startsWith("0091")
     ) {
 
-        return "+91" +
-            number.substring(4);
+        return (
+            "+91" +
+            number.substring(4)
+        );
 
     }
 
@@ -227,8 +243,10 @@ function normalizePhone(phone) {
         number.length === 11
     ) {
 
-        return "+91" +
-            number.substring(1);
+        return (
+            "+91" +
+            number.substring(1)
+        );
 
     }
 
@@ -237,8 +255,10 @@ function normalizePhone(phone) {
         number.length === 10
     ) {
 
-        return "+91" +
-            number;
+        return (
+            "+91" +
+            number
+        );
 
     }
 
@@ -276,7 +296,7 @@ async function saveUser(user) {
                 : {};
 
 
-        const data = {
+        const userData = {
 
             uid:
                 user.uid,
@@ -287,7 +307,8 @@ async function saveUser(user) {
                 "Oii Chat User",
 
             email:
-                user.email || "",
+                user.email ||
+                "",
 
             photoURL:
                 oldData.photoURL ||
@@ -296,230 +317,4 @@ async function saveUser(user) {
 
             about:
                 oldData.about ||
-                "Hey there! I am using Oii Chat.",
-
-            lastLogin:
-                new Date()
-
-        };
-
-
-        if (user.phoneNumber) {
-
-            data.phone =
-                normalizePhone(
-                    user.phoneNumber
-                );
-
-        }
-
-
-        if (!existing.exists()) {
-
-            data.createdAt =
-                new Date();
-
-        }
-
-
-        await setDoc(
-
-            userRef,
-
-            data,
-
-            {
-                merge: true
-            }
-
-        );
-
-
-        console.log(
-            "User saved successfully ✅"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Save user error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ==========================================
-// LOAD MY PROFILE
-// ==========================================
-
-async function loadMyProfile(user) {
-
-    if (!user) return;
-
-    try {
-
-        const userRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
-
-
-        const snapshot =
-            await getDoc(userRef);
-
-
-        if (!snapshot.exists()) {
-
-            await saveUser(user);
-
-            return;
-
-        }
-
-
-        const data =
-            snapshot.data();
-
-
-        // NAME
-
-        const name =
-            data.name ||
-            user.displayName ||
-            "Oii Chat User";
-
-
-        // ABOUT
-
-        const about =
-            data.about ||
-            "Hey there! I am using Oii Chat.";
-
-
-        // PHOTO
-
-        const photo =
-            data.photoURL ||
-            user.photoURL ||
-            DEFAULT_PROFILE;
-
-
-        // UPDATE HOME
-
-        if (myProfile) {
-
-            myProfile.src =
-                photo;
-
-        }
-
-
-        if (myStatus) {
-
-            myStatus.textContent =
-                "Online";
-
-        }
-
-
-        // UPDATE PROFILE PANEL
-
-        if (profilePreview) {
-
-            profilePreview.src =
-                photo;
-
-        }
-
-
-        if (profileNameInput) {
-
-            profileNameInput.value =
-                name;
-
-        }
-
-
-        if (profileAboutInput) {
-
-            profileAboutInput.value =
-                about;
-
-        }
-
-
-        if (profileEmailInput) {
-
-            profileEmailInput.value =
-                user.email || "";
-
-        }
-
-
-        console.log(
-            "Profile loaded ✅"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Profile load error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ==========================================
-// GOOGLE LOGIN
-// ==========================================
-
-if (googleLoginBtn) {
-
-    googleLoginBtn.addEventListener(
-
-        "click",
-
-        async function () {
-
-            try {
-
-                googleLoginBtn.disabled =
-                    true;
-
-
-                showMessage(
-                    "Google login opening... 🔵"
-                );
-
-
-                const result =
-                    await signInWithPopup(
-
-                        auth,
-
-                        googleProvider
-
-                    );
-
-
-                const user =
-                    result.user;
-
-
-                await saveUser(user);
-
-                await loadMyProfile(user);
-
-
-                showMessage(
-                    "Welcome to Oii Chat ❤️
+                "Hey there! I am using Oii
