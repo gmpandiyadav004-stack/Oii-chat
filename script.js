@@ -1,6 +1,7 @@
 // ==========================================
 // OII CHAT
 // FIREBASE GOOGLE LOGIN + USERS + CONTACTS
+// OTP இல்லாமல்
 // ==========================================
 
 import {
@@ -92,7 +93,7 @@ const myProfile =
 
 
 // ==========================================
-// MESSAGE
+// AUTH MESSAGE
 // ==========================================
 
 function showMessage(text) {
@@ -122,6 +123,86 @@ function showContactsMessage(text) {
 
 
 // ==========================================
+// NORMALIZE EMAIL
+// ==========================================
+
+function normalizeEmail(email) {
+
+    if (!email) return "";
+
+    return email
+        .trim()
+        .toLowerCase();
+
+}
+
+
+// ==========================================
+// NORMALIZE PHONE
+// ==========================================
+
+function normalizePhone(phone) {
+
+    if (!phone) return "";
+
+    let number =
+        String(phone).replace(
+            /[^0-9+]/g,
+            ""
+        );
+
+    // +91 9876543210
+    if (
+        number.startsWith("+91")
+    ) {
+
+        number =
+            "+91" +
+            number.substring(3)
+                .replace(/\D/g, "");
+
+    }
+
+    // 0091 9876543210
+    else if (
+        number.startsWith("0091")
+    ) {
+
+        number =
+            "+91" +
+            number.substring(4);
+
+    }
+
+    // 09876543210
+    else if (
+        number.startsWith("0") &&
+        number.length === 11
+    ) {
+
+        number =
+            "+91" +
+            number.substring(1);
+
+    }
+
+    // 9876543210
+    else if (
+        number.length === 10
+    ) {
+
+        number =
+            "+91" +
+            number;
+
+    }
+
+    return number;
+
+}
+
+
+// ==========================================
 // SAVE USER
 // ==========================================
 
@@ -132,31 +213,48 @@ async function saveUser(user) {
         const userRef =
             doc(db, "users", user.uid);
 
+        const userData = {
+
+            uid: user.uid,
+
+            name:
+                user.displayName || "",
+
+            email:
+                normalizeEmail(
+                    user.email || ""
+                ),
+
+            photoURL:
+                user.photoURL || "",
+
+            lastLogin:
+                new Date(),
+
+            createdAt:
+                new Date()
+
+        };
+
+
+        // If Firebase Auth has a phone
+        // number, save it too.
+
+        if (user.phoneNumber) {
+
+            userData.phone =
+                normalizePhone(
+                    user.phoneNumber
+                );
+
+        }
+
 
         await setDoc(
 
             userRef,
 
-            {
-
-                uid: user.uid,
-
-                name:
-                    user.displayName || "",
-
-                email:
-                    user.email || "",
-
-                photoURL:
-                    user.photoURL || "",
-
-                lastLogin:
-                    new Date(),
-
-                createdAt:
-                    new Date()
-
-            },
+            userData,
 
             {
                 merge: true
@@ -166,7 +264,8 @@ async function saveUser(user) {
 
 
         console.log(
-            "User saved successfully ✅"
+            "Oii Chat user saved ✅",
+            userData
         );
 
 
@@ -192,8 +291,10 @@ function updateMyProfile(user) {
 
     if (!user) return;
 
-
-    if (myProfile && user.photoURL) {
+    if (
+        myProfile &&
+        user.photoURL
+    ) {
 
         myProfile.src =
             user.photoURL;
@@ -219,7 +320,6 @@ if (googleLoginBtn) {
 
                 googleLoginBtn.disabled =
                     true;
-
 
                 showMessage(
                     "Google login opening... 🔵"
@@ -247,7 +347,6 @@ if (googleLoginBtn) {
 
 
                 await saveUser(user);
-
 
                 updateMyProfile(user);
 
@@ -302,69 +401,22 @@ if (googleLoginBtn) {
 
 
 // ==========================================
-// NORMALIZE PHONE NUMBER
+// FIND USER BY EMAIL
 // ==========================================
 
-function normalizePhone(phone) {
+async function findUserByEmail(email) {
 
-    if (!phone) return "";
+    const normalizedEmail =
+        normalizeEmail(email);
 
+    if (!normalizedEmail) {
 
-    let number =
-        phone.replace(
-            /[^0-9+]/g,
-            ""
-        );
-
-
-    // India number handling
-    if (
-        number.startsWith("0") &&
-        number.length === 10
-    ) {
-
-        number =
-            "+91" +
-            number.substring(1);
+        return null;
 
     }
 
-
-    if (
-        number.length === 10 &&
-        !number.startsWith("+")
-    ) {
-
-        number =
-            "+91" +
-            number;
-
-    }
-
-
-    return number;
-
-}
-
-
-// ==========================================
-// FIND USER BY PHONE
-// ==========================================
-
-async function findUserByPhone(phone) {
 
     try {
-
-        const normalized =
-            normalizePhone(phone);
-
-
-        if (!normalized) {
-
-            return null;
-
-        }
-
 
         const usersRef =
             collection(db, "users");
@@ -372,12 +424,15 @@ async function findUserByPhone(phone) {
 
         const q =
             query(
+
                 usersRef,
+
                 where(
-                    "phone",
+                    "email",
                     "==",
-                    normalized
+                    normalizedEmail
                 )
+
             );
 
 
@@ -385,9 +440,7 @@ async function findUserByPhone(phone) {
             await getDocs(q);
 
 
-        if (
-            snapshot.empty
-        ) {
+        if (snapshot.empty) {
 
             return null;
 
@@ -415,13 +468,209 @@ async function findUserByPhone(phone) {
     } catch (error) {
 
         console.error(
-            "Find user error:",
+            "Find user by email error:",
             error
         );
 
         return null;
 
     }
+
+}
+
+
+// ==========================================
+// FIND USER BY PHONE
+// ==========================================
+
+async function findUserByPhone(phone) {
+
+    const normalizedPhone =
+        normalizePhone(phone);
+
+    if (!normalizedPhone) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const usersRef =
+            collection(db, "users");
+
+
+        const q =
+            query(
+
+                usersRef,
+
+                where(
+                    "phone",
+                    "==",
+                    normalizedPhone
+                )
+
+            );
+
+
+        const snapshot =
+            await getDocs(q);
+
+
+        if (snapshot.empty) {
+
+            return null;
+
+        }
+
+
+        let foundUser = null;
+
+
+        snapshot.forEach(
+
+            function (document) {
+
+                foundUser =
+                    document.data();
+
+            }
+
+        );
+
+
+        return foundUser;
+
+
+    } catch (error) {
+
+        console.error(
+            "Find user by phone error:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// ==========================================
+// FIND USER FROM ONE CONTACT
+// ==========================================
+
+async function findOiiUserFromContact(contact) {
+
+    // --------------------------------------
+    // 1. EMAIL MATCH
+    // --------------------------------------
+
+    if (contact.email) {
+
+        for (
+            const email of contact.email
+        ) {
+
+            const user =
+                await findUserByEmail(
+                    email
+                );
+
+
+            if (user) {
+
+                return user;
+
+            }
+
+        }
+
+    }
+
+
+    // --------------------------------------
+    // 2. PHONE MATCH
+    // --------------------------------------
+
+    if (contact.tel) {
+
+        for (
+            const phone of contact.tel
+        ) {
+
+            const user =
+                await findUserByPhone(
+                    phone
+                );
+
+
+            if (user) {
+
+                return user;
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+// ==========================================
+// DIRECT CHAT
+// ==========================================
+
+function openDirectChat(user) {
+
+    if (!user) return;
+
+
+    console.log(
+        "Opening direct chat with:",
+        user.name,
+        user.uid
+    );
+
+
+    /*
+       If your existing chat system already
+       has a function called openChat(),
+       use it automatically.
+    */
+
+    if (
+        typeof window.openChat ===
+        "function"
+    ) {
+
+        window.openChat(user);
+
+        return;
+
+    }
+
+
+    /*
+       Otherwise keep selected user
+       ready for the next chat system.
+    */
+
+    window.selectedOiiChatUser =
+        user;
+
+
+    showContactsMessage(
+
+        `${user.name || "Friend"} selected 💬`
+
+    );
 
 }
 
@@ -435,6 +684,10 @@ function addFriendToScreen(user) {
     if (!friendsList) return;
 
 
+    // --------------------------------------
+    // FRIEND CARD
+    // --------------------------------------
+
     const friend =
         document.createElement(
             "div"
@@ -444,6 +697,30 @@ function addFriendToScreen(user) {
     friend.className =
         "friend-card";
 
+
+    friend.style.cursor =
+        "pointer";
+
+
+    friend.style.display =
+        "flex";
+
+
+    friend.style.alignItems =
+        "center";
+
+
+    friend.style.gap =
+        "12px";
+
+
+    friend.style.padding =
+        "10px";
+
+
+    // --------------------------------------
+    // PROFILE IMAGE
+    // --------------------------------------
 
     const image =
         document.createElement(
@@ -457,8 +734,26 @@ function addFriendToScreen(user) {
 
 
     image.alt =
-        user.name || "Friend";
+        user.name ||
+        "Friend";
 
+
+    image.width = 50;
+
+    image.height = 50;
+
+
+    image.style.borderRadius =
+        "50%";
+
+
+    image.style.objectFit =
+        "cover";
+
+
+    // --------------------------------------
+    // INFO
+    // --------------------------------------
 
     const info =
         document.createElement(
@@ -492,9 +787,30 @@ function addFriendToScreen(user) {
     info.appendChild(email);
 
 
+    // --------------------------------------
+    // ADD
+    // --------------------------------------
+
     friend.appendChild(image);
 
     friend.appendChild(info);
+
+
+    // --------------------------------------
+    // TAP FRIEND
+    // --------------------------------------
+
+    friend.addEventListener(
+
+        "click",
+
+        function () {
+
+            openDirectChat(user);
+
+        }
+
+    );
 
 
     friendsList.appendChild(friend);
@@ -518,10 +834,14 @@ function clearFriends() {
 
 
 // ==========================================
-// FIND FRIENDS FROM CONTACTS
+// FIND FRIENDS FROM PHONE CONTACTS
 // ==========================================
 
 async function findFriendsFromContacts() {
+
+    // --------------------------------------
+    // LOGIN CHECK
+    // --------------------------------------
 
     if (!auth.currentUser) {
 
@@ -534,16 +854,33 @@ async function findFriendsFromContacts() {
     }
 
 
-    // Browser support check
+    // --------------------------------------
+    // CONTACTS API CHECK
+    // --------------------------------------
 
     if (
-        !("contacts" in navigator) ||
-        !("ContactsManager" in window)
+        !("contacts" in navigator)
     ) {
 
         showContactsMessage(
 
-            "இந்த browser-ல் Contacts access support இல்லை. Android app version-ல் இதை properly செய்யலாம். 📱"
+            "இந்த browser-ல் Phone Contacts access இல்லை. 📱"
+
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !navigator.contacts ||
+        !navigator.contacts.select
+    ) {
+
+        showContactsMessage(
+
+            "இந்த device/browser Contacts API support செய்யவில்லை. 📱"
 
         );
 
@@ -559,14 +896,25 @@ async function findFriendsFromContacts() {
         );
 
 
+        // ----------------------------------
+        // REQUEST CONTACT DATA
+        // ----------------------------------
+
         const properties = [
+
             "name",
-            "tel"
+
+            "tel",
+
+            "email"
+
         ];
 
 
         const options = {
+
             multiple: true
+
         };
 
 
@@ -580,13 +928,19 @@ async function findFriendsFromContacts() {
             );
 
 
+        // ----------------------------------
+        // NOTHING SELECTED
+        // ----------------------------------
+
         if (
             !contacts ||
             contacts.length === 0
         ) {
 
             showContactsMessage(
+
                 "Contacts select செய்யவில்லை."
+
             );
 
             return;
@@ -598,72 +952,94 @@ async function findFriendsFromContacts() {
 
 
         showContactsMessage(
-            "Friends தேடுகிறது... 🔍"
+            "Oii Chat users தேடுகிறது... 🔍"
         );
+
+
+        // ----------------------------------
+        // PREVENT DUPLICATES
+        // ----------------------------------
+
+        const foundUserIds =
+            new Set();
 
 
         let foundCount = 0;
 
 
+        // ----------------------------------
+        // CHECK EVERY CONTACT
+        // ----------------------------------
+
         for (
             const contact of contacts
         ) {
 
+            const user =
+                await findOiiUserFromContact(
+                    contact
+                );
 
-            if (!contact.tel) {
+
+            if (!user) {
 
                 continue;
 
             }
 
 
-            for (
-                const phone of contact.tel
+            // --------------------------------
+            // DON'T SHOW MYSELF
+            // --------------------------------
+
+            if (
+                auth.currentUser.uid ===
+                user.uid
             ) {
 
-
-                const user =
-                    await findUserByPhone(
-                        phone
-                    );
-
-
-                if (user) {
-
-
-                    // Don't show yourself
-
-                    if (
-                        auth.currentUser.uid
-                        === user.uid
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    addFriendToScreen(
-                        user
-                    );
-
-
-                    foundCount++;
-
-                    break;
-
-                }
+                continue;
 
             }
+
+
+            // --------------------------------
+            // DON'T SHOW DUPLICATES
+            // --------------------------------
+
+            if (
+                foundUserIds.has(
+                    user.uid
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            foundUserIds.add(
+                user.uid
+            );
+
+
+            addFriendToScreen(user);
+
+            foundCount++;
 
         }
 
 
-        if (foundCount === 0) {
+        // ----------------------------------
+        // RESULT
+        // ----------------------------------
+
+        if (
+            foundCount === 0
+        ) {
 
             showContactsMessage(
 
-                "உன் contacts-ல Oii Chat use பண்ற friends இன்னும் கிடைக்கவில்லை. 😕"
+                "உன் contacts-ல Oii Chat use பண்றவர்கள் கிடைக்கவில்லை. 😕"
 
             );
 
@@ -686,11 +1062,26 @@ async function findFriendsFromContacts() {
         );
 
 
-        showContactsMessage(
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
 
-            "Contacts access cancelled அல்லது error ஏற்பட்டது ❌"
+            showContactsMessage(
 
-        );
+                "Contacts permission கொடுக்கவில்லை ❌"
+
+            );
+
+        } else {
+
+            showContactsMessage(
+
+                "Contacts access error ❌"
+
+            );
+
+        }
 
     }
 
@@ -715,7 +1106,7 @@ if (findContactsBtn) {
 
 
 // ==========================================
-// CHECK LOGIN STATE
+// LOGIN STATE
 // ==========================================
 
 onAuthStateChanged(
@@ -724,12 +1115,10 @@ onAuthStateChanged(
 
     async function (user) {
 
-
         if (user) {
 
-
             console.log(
-                "User already logged in:",
+                "User logged in:",
                 user.email
             );
 
@@ -768,7 +1157,6 @@ onAuthStateChanged(
 
 
         } else {
-
 
             console.log(
                 "No user logged in"
@@ -827,9 +1215,24 @@ window.logoutOiiChat =
 
 
 // ==========================================
+// MAKE FUNCTIONS AVAILABLE
+// ==========================================
+
+window.findFriendsFromContacts =
+    findFriendsFromContacts;
+
+window.openDirectChat =
+    openDirectChat;
+
+
+// ==========================================
 // DEBUG
 // ==========================================
 
 console.log(
-    "Oii Chat loaded successfully ✅"
+    "Oii Chat Contacts System loaded ✅"
+);
+
+console.log(
+    "Google Login + Users + Contacts + Matching ready 🔥"
 );
