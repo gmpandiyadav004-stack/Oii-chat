@@ -61,7 +61,7 @@
 
 
     <!-- ======================================
-         OII CHAT APP
+         MAIN OII CHAT
     ======================================= -->
 
     <div
@@ -72,7 +72,7 @@
 
 
         <!-- ==================================
-             TOP HEADER
+             HEADER
         =================================== -->
 
         <header class="top-header">
@@ -80,12 +80,20 @@
 
             <div class="header-left">
 
-                <img
-                    id="myProfile"
-                    src="profile.png"
-                    class="my-profile"
-                    alt="Profile"
+                <button
+                    id="profileOpenBtn"
+                    class="profile-button"
+                    type="button"
                 >
+
+                    <img
+                        id="myProfile"
+                        src="profile.png"
+                        class="my-profile"
+                        alt="Profile"
+                    >
+
+                </button>
 
 
                 <div>
@@ -120,234 +128,4 @@
                     title="More"
                 >
                     ⋮
-                </button>
-
-            </div>
-
-        </header>
-
-
-
-        <!-- ==================================
-             TABS
-        =================================== -->
-
-        <nav class="chat-tabs">
-
-            <button
-                class="tab active"
-                type="button"
-            >
-                Chats
-            </button>
-
-
-            <button
-                class="tab"
-                type="button"
-            >
-                Updates
-            </button>
-
-
-            <button
-                class="tab"
-                type="button"
-            >
-                Calls
-            </button>
-
-        </nav>
-
-
-
-        <!-- ==================================
-             CHAT LIST
-        =================================== -->
-
-        <main class="chat-container">
-
-
-            <section
-                class="friends-section"
-            >
-
-
-                <!-- Hidden message area
-                     used by JavaScript -->
-
-                <p
-                    id="contactsMessage"
-                    class="contacts-message"
-                ></p>
-
-
-                <!-- Friends appear here -->
-
-                <div
-                    id="friendsList"
-                    class="friends-list"
-                ></div>
-
-
-                <!-- Empty chat screen -->
-
-                <div
-                    id="emptyChats"
-                    class="empty-chats"
-                >
-
-                    <div class="empty-icon">
-                        💬
-                    </div>
-
-                    <h2>
-                        No chats yet
-                    </h2>
-
-                    <p>
-                        Start a new conversation
-                    </p>
-
-                </div>
-
-
-            </section>
-
-
-        </main>
-
-
-
-        <!-- ==================================
-             FLOATING NEW CHAT BUTTON
-        =================================== -->
-
-        <button
-            id="findContactsBtn"
-            class="new-chat-btn"
-            type="button"
-            title="New Chat"
-        >
-            +
-        </button>
-
-
-
-        <!-- ==================================
-             CONTACTS PANEL
-        =================================== -->
-
-        <div
-            id="contactsPanel"
-            class="contacts-panel"
-            style="display:none;"
-        >
-
-
-            <div class="contacts-header">
-
-
-                <button
-                    id="closeContactsBtn"
-                    type="button"
-                    class="back-btn"
-                >
-                    ←
-                </button>
-
-
-                <div>
-
-                    <h2>
-                        New Chat
-                    </h2>
-
-                    <span>
-                        Contacts
-                    </span>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="contacts-body">
-
-
-                <div class="contacts-title">
-
-                    <span>
-                        👥
-                    </span>
-
-                    <strong>
-                        Oii Chat Contacts
-                    </strong>
-
-                </div>
-
-
-                <p class="contacts-info">
-
-                    Your phone contacts who use
-                    Oii Chat will appear here.
-
-                </p>
-
-
-                <!-- Matching users -->
-
-                <div
-                    id="contactFriendsList"
-                    class="friends-list"
-                ></div>
-
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ==================================
-             WELCOME CHAT
-        =================================== -->
-
-        <div
-            id="welcomeChat"
-            class="welcome-chat"
-        >
-
-            <div class="welcome-icon">
-                ❤️
-            </div>
-
-            <h2>
-                Welcome to Oii Chat
-            </h2>
-
-            <p>
-                Your private chat app is ready.
-            </p>
-
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-
-<script
-    type="module"
-    src="./script.js"
-></script>
-
-
-</body>
-
-</html>
+                </
