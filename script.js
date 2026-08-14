@@ -2,8 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebas
 
 import {
     getAuth,
-    RecaptchaVerifier,
-    signInWithPhoneNumber
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 
@@ -31,132 +32,120 @@ const auth = getAuth(app);
 
 
 // ===============================
+// GOOGLE PROVIDER
+// ===============================
+
+const googleProvider = new GoogleAuthProvider();
+
+
+// ===============================
+// ELEMENTS
+// ===============================
+
+const loginScreen = document.getElementById("loginScreen");
+const chatApp = document.getElementById("chatApp");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const message = document.getElementById("authMessage");
+
+
+// ===============================
 // MESSAGE
 // ===============================
 
-const message = document.getElementById("authMessage");
-
 function showMessage(text) {
-    message.innerText = text;
+    if (message) {
+        message.innerText = text;
+    }
 }
 
 
 // ===============================
-// reCAPTCHA
+// GOOGLE LOGIN
 // ===============================
 
-let recaptchaVerifier;
-let confirmationResult;
-
-function setupRecaptcha() {
-
-    if (recaptchaVerifier) {
-        return;
-    }
-
-    recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-            size: "normal"
-        }
-    );
-}
-
-
-// ===============================
-// SEND OTP
-// ===============================
-
-window.sendOTP = async function () {
-
-    const phoneNumber =
-        document.getElementById("phoneNumber").value.trim();
-
-    if (!phoneNumber) {
-        showMessage("Phone number enter pannunga 📱");
-        return;
-    }
-
-    if (!phoneNumber.startsWith("+")) {
-        showMessage(
-            "Country code use pannunga. Example: +919876543210"
-        );
-        return;
-    }
+googleLoginBtn.addEventListener("click", async () => {
 
     try {
 
-        showMessage("OTP sending... 📩");
+        googleLoginBtn.disabled = true;
 
-        setupRecaptcha();
+        showMessage("Google login opening... 🔵");
 
-        confirmationResult =
-            await signInWithPhoneNumber(
-                auth,
-                phoneNumber,
-                recaptchaVerifier
+        console.log("[Oii Chat] Google login started");
+
+        const result = await signInWithPopup(
+            auth,
+            googleProvider
+        );
+
+        const user = result.user;
+
+        console.log("[Oii Chat] Login successful:", user.uid);
+
+        showMessage(
+            `Welcome ${user.displayName || "to Oii Chat"} ❤️`
+        );
+
+        // Hide login screen
+        loginScreen.style.display = "none";
+
+        // Show chat app
+        chatApp.style.display = "block";
+
+    } catch (error) {
+
+        console.error(
+            "[Oii Chat] Google login error:",
+            error.code
+        );
+
+        if (error.code === "auth/popup-closed-by-user") {
+
+            showMessage(
+                "Google login cancel pannitinga."
             );
 
-        showMessage(
-            "OTP sent successfully ❤️ 6-digit OTP enter pannunga."
-        );
+        } else if (error.code === "auth/popup-blocked") {
 
-    } catch (error) {
+            showMessage(
+                "Google login popup browser block panniduchu. Please allow popups."
+            );
 
-        console.error(error);
+        } else {
 
-        showMessage(
-            "OTP send aagala ❌ " + error.message
-        );
-
-        if (recaptchaVerifier) {
-            recaptchaVerifier.clear();
-            recaptchaVerifier = null;
+            showMessage(
+                "Google login failed ❌ Please try again."
+            );
         }
+
+    } finally {
+
+        googleLoginBtn.disabled = false;
     }
-};
+});
 
 
 // ===============================
-// VERIFY OTP
+// CHECK LOGIN STATE
 // ===============================
 
-window.verifyOTP = async function () {
+onAuthStateChanged(auth, (user) => {
 
-    const otp =
-        document.getElementById("otpInput").value.trim();
+    if (user) {
 
-    if (!confirmationResult) {
-        showMessage("First Send OTP click pannunga 📩");
-        return;
-    }
-
-    if (otp.length !== 6) {
-        showMessage("6-digit OTP enter pannunga 🔢");
-        return;
-    }
-
-    try {
-
-        showMessage("Verifying OTP... ⏳");
-
-        await confirmationResult.confirm(otp);
-
-        showMessage("Login successful ❤️");
-
-        // Hide login
-        document.getElementById("loginScreen").style.display = "none";
-
-        // Show chat
-        document.getElementById("chatApp").style.display = "block";
-
-    } catch (error) {
-
-        console.error(error);
-
-        showMessage(
-            "Wrong OTP ❌ Please try again."
+        console.log(
+            "[Oii Chat] Existing login detected:",
+            user.uid
         );
+
+        loginScreen.style.display = "none";
+        chatApp.style.display = "block";
+
+    } else {
+
+        console.log("[Oii Chat] No user logged in");
+
+        loginScreen.style.display = "flex";
+        chatApp.style.display = "none";
     }
-};
+});
