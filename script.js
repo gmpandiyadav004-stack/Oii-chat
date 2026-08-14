@@ -1,8 +1,6 @@
 // ==========================================
 // OII CHAT
-// FIREBASE GOOGLE LOGIN
-// USERS + CONTACTS
-// WHATSAPP STYLE FRONT PAGE
+// GOOGLE LOGIN + CONTACTS + PROFILE
 // ==========================================
 
 import {
@@ -21,6 +19,7 @@ import {
     getFirestore,
     doc,
     setDoc,
+    getDoc,
     collection,
     getDocs,
     query,
@@ -51,7 +50,7 @@ const firebaseConfig = {
 
 
 // ==========================================
-// INITIALIZE FIREBASE
+// FIREBASE
 // ==========================================
 
 const app = initializeApp(firebaseConfig);
@@ -80,17 +79,47 @@ const googleLoginBtn =
 const authMessage =
     document.getElementById("authMessage");
 
+const myProfile =
+    document.getElementById("myProfile");
+
+const myStatus =
+    document.getElementById("myStatus");
+
+const profileOpenBtn =
+    document.getElementById("profileOpenBtn");
+
+const profilePanel =
+    document.getElementById("profilePanel");
+
+const closeProfileBtn =
+    document.getElementById("closeProfileBtn");
+
+const profilePreview =
+    document.getElementById("profilePreview");
+
+const profilePhotoInput =
+    document.getElementById("profilePhotoInput");
+
+const profileNameInput =
+    document.getElementById("profileNameInput");
+
+const profileAboutInput =
+    document.getElementById("profileAboutInput");
+
+const profileEmailInput =
+    document.getElementById("profileEmailInput");
+
+const saveProfileBtn =
+    document.getElementById("saveProfileBtn");
+
+const profileMessage =
+    document.getElementById("profileMessage");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
 const findContactsBtn =
     document.getElementById("findContactsBtn");
-
-const contactsMessage =
-    document.getElementById("contactsMessage");
-
-const friendsList =
-    document.getElementById("friendsList");
-
-const contactFriendsList =
-    document.getElementById("contactFriendsList");
 
 const contactsPanel =
     document.getElementById("contactsPanel");
@@ -98,12 +127,29 @@ const contactsPanel =
 const closeContactsBtn =
     document.getElementById("closeContactsBtn");
 
+const contactsMessage =
+    document.getElementById("contactsMessage");
+
+const contactFriendsList =
+    document.getElementById("contactFriendsList");
+
+const friendsList =
+    document.getElementById("friendsList");
+
 const emptyChats =
     document.getElementById("emptyChats");
 
 
 // ==========================================
-// MESSAGES
+// DEFAULT PROFILE
+// ==========================================
+
+const DEFAULT_PROFILE =
+    "profile.png";
+
+
+// ==========================================
+// MESSAGE
 // ==========================================
 
 function showMessage(text) {
@@ -111,6 +157,18 @@ function showMessage(text) {
     if (authMessage) {
 
         authMessage.textContent =
+            text;
+
+    }
+
+}
+
+
+function showProfileMessage(text) {
+
+    if (profileMessage) {
+
+        profileMessage.textContent =
             text;
 
     }
@@ -126,21 +184,6 @@ function showContactsMessage(text) {
             text;
 
     }
-
-}
-
-
-// ==========================================
-// NORMALIZE EMAIL
-// ==========================================
-
-function normalizeEmail(email) {
-
-    if (!email) return "";
-
-    return String(email)
-        .trim()
-        .toLowerCase();
 
 }
 
@@ -164,39 +207,37 @@ function normalizePhone(phone) {
         number.startsWith("+91")
     ) {
 
-        number =
-            "+91" +
-            number.substring(3);
+        return number;
 
     }
 
-    else if (
+
+    if (
         number.startsWith("0091")
     ) {
 
-        number =
-            "+91" +
+        return "+91" +
             number.substring(4);
 
     }
 
-    else if (
+
+    if (
         number.startsWith("0") &&
         number.length === 11
     ) {
 
-        number =
-            "+91" +
+        return "+91" +
             number.substring(1);
 
     }
 
-    else if (
+
+    if (
         number.length === 10
     ) {
 
-        number =
-            "+91" +
+        return "+91" +
             number;
 
     }
@@ -225,9 +266,260 @@ async function saveUser(user) {
             );
 
 
+        const existing =
+            await getDoc(userRef);
+
+
+        const oldData =
+            existing.exists()
+                ? existing.data()
+                : {};
+
+
         const data = {
 
             uid:
                 user.uid,
 
-           
+            name:
+                oldData.name ||
+                user.displayName ||
+                "Oii Chat User",
+
+            email:
+                user.email || "",
+
+            photoURL:
+                oldData.photoURL ||
+                user.photoURL ||
+                DEFAULT_PROFILE,
+
+            about:
+                oldData.about ||
+                "Hey there! I am using Oii Chat.",
+
+            lastLogin:
+                new Date()
+
+        };
+
+
+        if (user.phoneNumber) {
+
+            data.phone =
+                normalizePhone(
+                    user.phoneNumber
+                );
+
+        }
+
+
+        if (!existing.exists()) {
+
+            data.createdAt =
+                new Date();
+
+        }
+
+
+        await setDoc(
+
+            userRef,
+
+            data,
+
+            {
+                merge: true
+            }
+
+        );
+
+
+        console.log(
+            "User saved successfully ✅"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Save user error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// LOAD MY PROFILE
+// ==========================================
+
+async function loadMyProfile(user) {
+
+    if (!user) return;
+
+    try {
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+
+        const snapshot =
+            await getDoc(userRef);
+
+
+        if (!snapshot.exists()) {
+
+            await saveUser(user);
+
+            return;
+
+        }
+
+
+        const data =
+            snapshot.data();
+
+
+        // NAME
+
+        const name =
+            data.name ||
+            user.displayName ||
+            "Oii Chat User";
+
+
+        // ABOUT
+
+        const about =
+            data.about ||
+            "Hey there! I am using Oii Chat.";
+
+
+        // PHOTO
+
+        const photo =
+            data.photoURL ||
+            user.photoURL ||
+            DEFAULT_PROFILE;
+
+
+        // UPDATE HOME
+
+        if (myProfile) {
+
+            myProfile.src =
+                photo;
+
+        }
+
+
+        if (myStatus) {
+
+            myStatus.textContent =
+                "Online";
+
+        }
+
+
+        // UPDATE PROFILE PANEL
+
+        if (profilePreview) {
+
+            profilePreview.src =
+                photo;
+
+        }
+
+
+        if (profileNameInput) {
+
+            profileNameInput.value =
+                name;
+
+        }
+
+
+        if (profileAboutInput) {
+
+            profileAboutInput.value =
+                about;
+
+        }
+
+
+        if (profileEmailInput) {
+
+            profileEmailInput.value =
+                user.email || "";
+
+        }
+
+
+        console.log(
+            "Profile loaded ✅"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Profile load error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// GOOGLE LOGIN
+// ==========================================
+
+if (googleLoginBtn) {
+
+    googleLoginBtn.addEventListener(
+
+        "click",
+
+        async function () {
+
+            try {
+
+                googleLoginBtn.disabled =
+                    true;
+
+
+                showMessage(
+                    "Google login opening... 🔵"
+                );
+
+
+                const result =
+                    await signInWithPopup(
+
+                        auth,
+
+                        googleProvider
+
+                    );
+
+
+                const user =
+                    result.user;
+
+
+                await saveUser(user);
+
+                await loadMyProfile(user);
+
+
+                showMessage(
+                    "Welcome to Oii Chat ❤️
