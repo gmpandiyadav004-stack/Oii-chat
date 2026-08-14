@@ -36,11 +36,13 @@
     <!-- CHAT APP -->
     <div id="chatApp" style="display:none;">
 
+        <!-- HEADER -->
         <header class="top-header">
 
             <div class="profile-area">
 
                 <img
+                    id="myProfile"
                     src="profile.png"
                     class="my-profile"
                     alt="Profile"
@@ -48,7 +50,7 @@
 
                 <div>
                     <h1>Oii Chat 💬</h1>
-                    <span>Online</span>
+                    <span id="myStatus">Online</span>
                 </div>
 
             </div>
@@ -56,8 +58,29 @@
         </header>
 
 
+        <!-- MAIN -->
         <div class="chat-container">
 
+            <!-- FRIENDS -->
+            <div class="friends-section">
+
+                <h2>👥 My Friends</h2>
+
+                <button
+                    id="findContactsBtn"
+                    type="button"
+                >
+                    📱 Find Friends from Contacts
+                </button>
+
+                <p id="contactsMessage"></p>
+
+                <div id="friendsList"></div>
+
+            </div>
+
+
+            <!-- WELCOME -->
             <div class="welcome-chat">
 
                 <h2>Welcome to Oii Chat ❤️</h2>
